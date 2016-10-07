@@ -15,6 +15,11 @@ class WCSG_Admin {
 		add_filter( 'woocommerce_subscription_settings', __CLASS__ . '::add_settings', 10, 1 );
 
 		add_filter( 'request',  __CLASS__ . '::request_query', 11 , 1 );
+
+		add_action( 'woocommerce_admin_order_data_after_order_details', __CLASS__ . '::display_edit_subscription_recipient_field', 10, 1 );
+
+		// Save recipient user after WC have saved all subscription order items (40)
+		add_action( 'woocommerce_process_shop_order_meta', __CLASS__ . '::save_subscription_recipient_meta', 50, 2 );
 	}
 
 	/**
@@ -130,6 +135,76 @@ class WCSG_Admin {
 		}
 
 		return $vars;
+	}
+
+	/**
+	 * Output a recipient user select field in the edit subscription data metabox.
+	 *
+	 * @param WP_Post $subscription
+	 * @since 1.0.1
+	 */
+	public static function display_edit_subscription_recipient_field( $subscription ) {
+
+		if ( ! wcs_is_subscription( $subscription ) ) {
+			return;
+		} ?>
+
+		<p class="form-field form-field-wide wc-customer-user">
+			<label for="recipient_user"><?php esc_html_e( 'Recipient:', 'woocommerce-subscriptions-gifting' ) ?></label><?php
+			$user_string = '';
+			$user_id     = '';
+			if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
+				$user_id     = absint( $subscription->recipient_user );
+				$user        = get_user_by( 'id', $user_id );
+				$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
+			} ?>
+			<input type="hidden" class="wc-customer-search" id="recipient_user" name="recipient_user" data-placeholder="<?php esc_attr_e( 'Search for a recipient&hellip;', 'woocommerce-subscriptions-gifting' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true"/>
+		</p><?php
+	}
+
+	/**
+	 * Save subscription recipient user meta by updating or deleting _recipient_user post meta.
+	 * Also updates the recipient id stored in subscription line item meta.
+	 *
+	 * @param int $post_id
+	 * @param WP_Post $post
+	 * @since 1.0.1
+	 */
+	public static function save_subscription_recipient_meta( $post_id, $post ) {
+
+		if ( 'shop_subscription' != $post->post_type || ! isset( $_POST['recipient_user'] ) || empty( $_POST['woocommerce_meta_nonce'] ) || ! wp_verify_nonce( $_POST['woocommerce_meta_nonce'], 'woocommerce_save_data' ) ) {
+			return;
+		}
+
+		$recipient_user         = empty( $_POST['recipient_user'] ) ? '' : absint( $_POST['recipient_user'] );
+		$customer_user          = get_post_meta( $post_id, '_customer_user', true );
+		$subscription           = wcs_get_subscription( $post_id );
+		$is_gifted_subscription = WCS_Gifting::is_gifted_subscription( $subscription );
+
+		if ( $recipient_user == $customer_user ) {
+			// Remove the recipient
+			$recipient_user = '';
+			wcs_add_admin_notice( __( 'Error saving subscription recipient: customer and recipient cannot be the same. The recipient user has been removed.', 'woocommerce-subscriptions-gifting' ), 'error' );
+		}
+
+		if ( ( $is_gifted_subscription && $subscription->recipient_user == $recipient_user ) || ( ! $is_gifted_subscription && empty( $recipient_user ) ) ) {
+			// Recipient user remains unchanged - do nothing
+			return;
+		} elseif ( empty( $recipient_user ) ) {
+			delete_post_meta( $post_id, '_recipient_user' );
+
+			// Delete recipient meta from subscription order items
+			foreach ( $subscription->get_items() as $order_item_id => $order_item ) {
+				wc_delete_order_item_meta( $order_item_id, 'wcsg_recipient' );
+			}
+		} else {
+			update_post_meta( $post_id, '_recipient_user', $recipient_user );
+
+			// Update all subscription order items
+			foreach ( $subscription->get_items() as $order_item_id => $order_item ) {
+				wc_update_order_item_meta( $order_item_id, 'wcsg_recipient', 'wcsg_recipient_id_' . $recipient_user );
+			}
+		}
 	}
 }
 WCSG_Admin::init();
