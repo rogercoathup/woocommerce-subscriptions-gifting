@@ -46,7 +46,7 @@ class WCSG_Memberships_Integration {
 			$grant_access_to_recipients = array();
 
 			foreach ( $order_items as $order_item_id => $order_item ) {
-				if ( wcs_get_canonical_product_id( $order_item ) == $product_id ) {
+				if ( $product_id && in_array( $product_id, array( $order_item['product_id'], $order_item['variation_id'] ) ) ) {
 					if ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) {
 						$grant_access_to_recipients[] = WCS_Gifting::get_order_item_recipient_user_id( $order_item );
 					} else {
@@ -108,10 +108,14 @@ class WCSG_Memberships_Integration {
 
 			foreach ( $order->get_items() as $order_item_id => $order_item ) {
 
-				if ( in_array( wcs_get_canonical_product_id( $order_item ), $all_access_granting_product_ids ) ) {
+				$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->customer_user;
 
-					$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->customer_user;
-					$user_unique_product_ids[ $user_id ][] = wcs_get_canonical_product_id( $order_item );
+				if ( in_array( $order_item['product_id'], $all_access_granting_product_ids ) ) {
+					$user_unique_product_ids[ $user_id ][] = $order_item['product_id'];
+				}
+
+				if ( in_array( $order_item['variation_id'], $all_access_granting_product_ids ) ) {
+					$user_unique_product_ids[ $user_id ][] = $order_item['variation_id'];
 				}
 			}
 
