@@ -13,7 +13,7 @@
 $form_fields = WCSG_Recipient_Details::get_new_recipient_account_form_fields( WC()->countries->get_base_country() );
 
 foreach ( $form_fields as $key => $field ) {
-	if ( 'shipping_country' == $key ) { ?>
+	if ( 'shipping_company' == $key ) { ?>
 		<h3> <?php esc_html_e( 'Shipping Address', 'woocommerce-subscriptions-gifting' ); ?></h3><?php
 	}
 	$value = isset( $field['default'] ) ? $field['default'] : '';
