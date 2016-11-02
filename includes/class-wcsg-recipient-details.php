@@ -124,16 +124,43 @@ class WCSG_Recipient_Details {
 	 */
 	public static function get_new_recipient_account_form_fields( $country ) {
 
-		$form_fields = WC()->countries->get_address_fields( $country, 'shipping_', true );
+		$shipping_fields = array();
 
-		$name_fields = array( 'shipping_first_name', 'shipping_last_name' );
+		if ( wc_shipping_enabled() ) {
+			$shipping_fields = WC()->countries->get_address_fields( $country, 'shipping_', true );
+
+			// We have our own name fields, so hide and make the shipping name fields not required
+			foreach ( array( 'shipping_first_name', 'shipping_last_name' ) as $field_key ) {
+				$shipping_fields[ $field_key ]['type'] = 'hidden';
+				$shipping_fields[ $field_key ]['required'] = false;
+			}
+
+			// Add the option for users to also set their billing address
+			$shipping_fields['set_billing'] = array(
+				'type'     => 'checkbox',
+				'label'    => esc_html__( 'Set my billing address to the same as above.', 'woocommerce-subscriptions-gifting' ),
+				'class'    => array( 'form-row' ),
+				'required' => false,
+				'default'  => 1,
+			);
+		}
+
 		$personal_fields = array();
 
-		//move the name fields to the front of the array for display purposes.
-		foreach ( $name_fields as $element ) {
-			$personal_fields[ $element ] = $form_fields[ $element ];
-			unset( $form_fields[ $element ] );
-		}
+		$personal_fields['first_name'] = array(
+			'label'        => esc_html__( 'First Name', 'woocommerce-subscriptions-gifting' ),
+			'required'     => true,
+			'class'        => array( 'form-row-first' ),
+			'autocomplete' => 'given-name',
+		);
+
+		$personal_fields['last_name'] = array(
+			'label'        => esc_html__( 'Last Name', 'woocommerce-subscriptions-gifting' ),
+			'required'     => true,
+			'class'        => array( 'form-row-last' ),
+			'clear'        => true,
+			'autocomplete' => 'family-name',
+		);
 
 		$personal_fields['new_password'] = array(
 			'type'     => 'password',
@@ -149,15 +176,8 @@ class WCSG_Recipient_Details {
 			'password' => true,
 			'class'    => array( 'form-row-last' ),
 		);
-		$form_fields['set_billing'] = array(
-			'type'     => 'checkbox',
-			'label'    => esc_html__( 'Set my billing address to the same as above.', 'woocommerce-subscriptions-gifting' ),
-			'class'    => array( 'form-row' ),
-			'required' => false,
-			'default'  => 1,
-		);
 
-		return array_merge( $personal_fields, $form_fields );
+		return apply_filters( 'wcsg_new_recipient_account_details_fields', array_merge( $personal_fields, $shipping_fields ) );
 	}
 }
 WCSG_Recipient_Details::init();
