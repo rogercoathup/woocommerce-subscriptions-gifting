@@ -53,63 +53,102 @@ class WCSG_Recipient_Details {
 	public static function update_recipient_details() {
 		if ( isset( $_POST['wcsg_new_recipient_customer'] ) && ! empty( $_POST['_wcsgnonce'] ) && wp_verify_nonce( $_POST['_wcsgnonce'], 'wcsg_new_recipient_data' ) ) {
 
-			$country     = ( ! empty( $_POST['shipping_country'] ) ) ? wc_clean( $_POST['shipping_country'] ) : '';
-			$form_fields = self::get_new_recipient_account_form_fields( $country );
-
-			$seperate_validation_fields = array( 'shipping_first_name','shipping_last_name','new_password','repeat_password' );
-
-			if ( empty( $_POST['shipping_first_name'] ) || empty( $_POST['shipping_last_name'] ) ) {
-				wc_add_notice( __( 'Please enter your name.', 'woocommerce-subscriptions-gifting' ), 'error' );
-			}
-
-			if ( empty( $_POST['new_password'] ) || empty( $_POST['repeat_password'] ) ) {
-				wc_add_notice( __( 'Please enter both password fields.', 'woocommerce-subscriptions-gifting' ), 'error' );
-			} else if ( $_POST['new_password'] != $_POST['repeat_password'] ) {
-				wc_add_notice( __( 'Passwords do not match.', 'woocommerce-subscriptions-gifting' ), 'error' );
-			}
+			$country          = ( ! empty( $_POST['shipping_country'] ) ) ? wc_clean( $_POST['shipping_country'] ) : '';
+			$form_fields      = self::get_new_recipient_account_form_fields( $country );
+			$password_fields  = array();
+			$password_missing = false;
 
 			foreach ( $form_fields as $key => $field ) {
-				if ( ( ! empty( $field['required'] ) && empty( $_POST[ $key ] ) ) && ! in_array( $key, $seperate_validation_fields ) ) {
-					wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce-subscriptions-gifting' ), 'error' );
+
+				if ( isset( $field['type'] ) && 'password' == $field['type'] ) {
+					$password_fields[ $key ] = $field;
+				}
+
+				// If the field is a required field and missing from posted data
+				if ( isset( $field['required'] ) && true == $field['required'] && empty( $_POST[ $key ] ) ) {
+
+					if ( isset( $password_fields[ $key ] ) ) {
+						if ( ! $password_missing ) {
+							wc_add_notice( __( 'Please enter both password fields.', 'woocommerce-subscriptions-gifting' ), 'error' );
+							$password_missing = true;
+						}
+					} else {
+						wc_add_notice( $field['label'] . ' ' . __( 'is a required field.', 'woocommerce-subscriptions-gifting' ), 'error' );
+					}
 				}
 			}
 
+			// Now match the passwords but only if we haven't displayed the password missing error
+			if ( ! $password_missing && ! empty( $password_fields ) ) {
+				$passwords = array_intersect_key( $_POST, $password_fields );
+
+				if ( count( array_unique( $passwords ) ) !== 1 ) {
+					wc_add_notice( __( 'The passwords you have entered do not match.', 'woocommerce-subscriptions-gifting' ), 'error' );
+				}
+			}
+
+			// Validate the postcode field
 			if ( $_POST['shipping_postcode'] && ! WC_Validation::is_postcode( $_POST['shipping_postcode'], $_POST['shipping_country'] ) ) {
 				wc_add_notice( __( 'Please enter a valid postcode/ZIP.', 'woocommerce-subscriptions-gifting' ), 'error' );
 			}
 
 			if ( 0 == wc_notice_count( 'error' ) ) {
-				//update the user meta first name and last name and password.
-				$user = wp_get_current_user();
+				$user    = wp_get_current_user();
 				$address = array();
+				$non_user_meta_keys = array( 'set_billing', 'new_password', 'repeat_password' );
+
 				foreach ( $form_fields as $key => $field ) {
-					if ( false == strpos( $key, 'password' ) && 'set_billing' != $key ) {
-						update_user_meta( $user->ID, $key, wc_clean( $_POST[ $key ] ) );
-						if ( isset( $_POST['set_billing'] ) ) {
-							update_user_meta( $user->ID, str_replace( 'shipping', 'billing', $key ), wc_clean( $_POST[ $key ] ) );
+
+					if ( ! in_array( $key, $non_user_meta_keys ) ) {
+
+						$value = isset( $_POST[ $key ] ) ? wc_clean( $_POST[ $key ] ) : '';
+
+						if ( false !== strpos( $key, 'shipping_' ) ) {
+
+							$address_field = str_replace( 'shipping_', '', $key ); // Get the key minus the leading 'shipping_'
+
+							// If the field is a shipping first or last name and there isn't a posted value, fallback to our custom name field (if it exists)
+							if ( in_array( $key, array( 'shipping_first_name', 'shipping_last_name' ) ) && empty( $_POST[ $key ] ) && ! empty( $_POST[ $address_field ] ) ) {
+								$value = wc_clean( $_POST[ $address_field ] );
+							}
+
+							if ( isset( $_POST['set_billing'] ) ) {
+								update_user_meta( $user->ID, str_replace( 'shipping', 'billing', $key ), $value );
+							}
+
+							$address[ $address_field ] = $value;
 						}
-						$address[ str_replace( 'shipping_', '', $key ) ] = wc_clean( $_POST[ $key ] );
+
+						update_user_meta( $user->ID, $key, $value );
 					}
 				}
-				$user->user_pass = wc_clean( $_POST['new_password'] );
 
-				$user_first_name = wc_clean( $_POST['shipping_first_name'] );
-				update_user_meta( $user->ID, 'first_name', $user_first_name );
-				update_user_meta( $user->ID, 'nickname', $user_first_name );
-				$user->display_name = $user_first_name;
+				if ( ! empty( $_POST['new_password'] ) ) {
+					$user->user_pass = wc_clean( $_POST['new_password'] );
+				}
 
-				update_user_meta( $user->ID, 'last_name', wc_clean( $_POST['shipping_last_name'] ) );
+				if ( ! empty( $_POST['first_name'] ) ) {
+					$user_first_name = wc_clean( $_POST['first_name'] );
+
+					update_user_meta( $user->ID, 'nickname', $user_first_name );
+					$user->display_name = $user_first_name;
+				}
 
 				wp_update_user( $user );
 
-				$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $user->ID );
+				if ( ! empty( $address ) ) {
+					$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $user->ID );
 
-				foreach ( $recipient_subscriptions as $subscription_id ) {
-					$subscription = wcs_get_subscription( $subscription_id );
-					$subscription->set_address( $address, 'shipping' );
+					foreach ( $recipient_subscriptions as $subscription_id ) {
+						$subscription = wcs_get_subscription( $subscription_id );
+						$subscription->set_address( $address, 'shipping' );
+					}
 				}
+
 				delete_user_meta( $user->ID, 'wcsg_update_account', 'true' );
+
 				wc_add_notice( __( 'Your account has been updated.', 'woocommerce-subscriptions-gifting' ), 'notice' );
+
 				wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 				exit;
 			}
