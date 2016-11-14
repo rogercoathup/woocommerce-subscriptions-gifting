@@ -18,7 +18,7 @@ class WCSG_Recipient_Management {
 
 		add_filter( 'woocommerce_subscription_related_orders', __CLASS__ . '::maybe_remove_parent_order', 11, 4 );
 
-		add_filter( 'user_has_cap', __CLASS__ . '::grant_recipient_capabilities', 11, 3 );
+		add_filter( 'user_has_cap', __CLASS__ . '::grant_recipient_capabilities', 20, 3 );
 
 		add_action( 'delete_user_form', __CLASS__ . '::maybe_display_delete_recipient_warning', 10 );
 
@@ -65,7 +65,22 @@ class WCSG_Recipient_Management {
 							}
 						}
 					}
-					break;
+				break;
+				case 'pay_for_order' :
+					$user_id = $args[1];
+					$order   = wc_get_order( $args[2] );
+
+					if ( $order && wcs_order_contains_subscription( $order, 'any' ) ) {
+						$subscriptions = wcs_get_subscriptions_for_renewal_order( $order );
+
+						foreach ( $subscriptions as $subscription ) {
+							if ( $user_id == $subscription->recipient_user ) {
+								$allcaps['pay_for_order'] = true;
+								break;
+							}
+						}
+					}
+				break;
 			}
 		}
 		return $allcaps;
