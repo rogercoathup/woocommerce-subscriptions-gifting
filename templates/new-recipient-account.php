@@ -1,3 +1,5 @@
+<?php wc_print_notices(); ?>
+
 <p><?php
 	esc_html_e( 'We just need a few details from you to complete your account creation.', 'woocommerce-subscriptions-gifting' ); ?><br /><?php
 	// translators: 1$: user's email, 2$-3$: opening and closing link tags, logs the user out.
