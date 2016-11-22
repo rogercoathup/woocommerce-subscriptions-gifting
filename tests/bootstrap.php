@@ -183,17 +183,3 @@ class WCS_Unit_Tests_Bootstrap {
 }
 
 WCS_Unit_Tests_Bootstrap::instance();
-
-/**
- * Override woothemes_queue_update() and is_active_woocommerce() so that the woocommerce_subscriptions.php
- * will import most of the necessary files without exiting early.
- * 
- * @since 2.0
- */
-function is_woocommerce_active() {
-	return true;
-}
-
-function woothemes_queue_update($file, $file_id, $product_id) {
-	return true;
-}
