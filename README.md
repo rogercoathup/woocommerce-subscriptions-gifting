@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/Prospress/woocommerce-subscriptions-gifting.svg?branch=master)](https://travis-ci.org/Prospress/woocommerce-subscriptions-gifting) [![codecov.io](http://codecov.io/github/Prospress/woocommerce-subscriptions-gifting/coverage.svg?token=d9aaaF18bY&branch=master)](http://codecov.io/github/Prospress/woocommerce-subscriptions-gifting?branch=master)
 [![license: GPL v2](https://img.shields.io/badge/license-GPLv2-blue.svg)](http://opensource.org/licenses/GPL-2.0)
 
-[WooCommerce Subscriptions](https://www.woothemes.com/products/woocommerce-subscriptions/) makes it possible to offer subscription products in your WooCommerce store.
+[WooCommerce Subscriptions](https://www.woocommerce.com/products/woocommerce-subscriptions/) makes it possible to offer subscription products in your WooCommerce store.
 
 But what happens if a customer wants to purchase a subscription for someone else?
 
@@ -114,13 +114,13 @@ When an order containing a gifted subscription product is created, the gift reci
 
 ### WooCommerce Memberships Integration
 
-If your store makes use of the WooCommerce Subscriptions and [WooCommerce Memberships](http://www.woothemes.com/products/woocommerce-memberships/) plugins the ability to purchase membership subscriptions is important. Which is why we have made sure we integrate with WooCommerce Memberships. 
+If your store makes use of the WooCommerce Subscriptions and [WooCommerce Memberships](http://www.woocommerce.com/products/woocommerce-memberships/) plugins the ability to purchase membership subscriptions is important. Which is why we have made sure we integrate with WooCommerce Memberships. 
 
 In a nutshell, gift recipients who are purchased a subscription product tied to a membership plan will receive the benefits of the membership rather than the purchaser. All the features of managing the memberships granted through gifted subscriptions remain intact, you can pause, edit, cancel and delete memberships granted to recipients just as normal through the **WooCommerce > Memberships** page.  
 
 ### Subscription Grouping
 
-WooCommerce Subscriptions version 2.0 creates subscriptions by [**grouping products**](http://docs.woothemes.com/document/subscriptions/multiple-subscriptions/#section-3) based on their billing schedule.
+WooCommerce Subscriptions version 2.0 creates subscriptions by [**grouping products**](http://docs.woocommerce.com/document/subscriptions/multiple-subscriptions/#section-3) based on their billing schedule.
 
 Gifting will also group products based on the recipient so that even if products have the same billing schedule, if they are for different recipients, they will not be grouped together.
 

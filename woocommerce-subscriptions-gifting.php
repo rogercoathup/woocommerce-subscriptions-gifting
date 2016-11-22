@@ -380,7 +380,7 @@ class WCS_Gifting {
 			<?php } else {
 				switch ( $plugin_name ) {
 					case 'WooCommerce Subscriptions':
-						$plugin_url = 'http://www.woothemes.com/products/woocommerce-subscriptions/';
+						$plugin_url = 'http://www.woocommerce.com/products/woocommerce-subscriptions/';
 						break;
 					case 'WooCommerce':
 						$plugin_url = 'http://wordpress.org/extend/plugins/woocommerce/';
