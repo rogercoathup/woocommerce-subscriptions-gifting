@@ -61,7 +61,7 @@ class WCSG_Checkout {
 			$recipient_user_id = email_exists( $cart_item['wcsg_gift_recipients_email'] );
 
 			if ( is_numeric( $recipient_user_id ) ) {
-				update_post_meta( $subscription->id, '_recipient_user', $recipient_user_id );
+				update_post_meta( wcsg_get_objects_id( $subscription ), '_recipient_user', $recipient_user_id );
 
 				$subscription->set_address( array(
 					'first_name' => get_user_meta( $recipient_user_id, 'shipping_first_name', true ),

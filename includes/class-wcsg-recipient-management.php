@@ -265,8 +265,10 @@ class WCSG_Recipient_Management {
 	public static function maybe_remove_parent_order( $related_orders, $subscription ) {
 		if ( WCS_Gifting::is_gifted_subscription( $subscription ) && get_current_user_id() == WCS_Gifting::get_recipient_user( $subscription ) ) {
 			$related_order_ids = array_keys( $related_orders );
-			if ( in_array( $subscription->order->id, $related_order_ids ) ) {
-				unset( $related_orders[ $subscription->order->id ] );
+			$parent_order_id   = wcsg_get_objects_id( wcsg_get_objects_property( $subscription, 'order' ) );
+
+			if ( in_array( $parent_order_id, $related_order_ids ) ) {
+				unset( $related_orders[ $parent_order_id ] );
 			}
 		}
 		return $related_orders;
@@ -474,7 +476,7 @@ class WCSG_Recipient_Management {
 					foreach ( $subscriptions as $subscription_id ) {
 
 						$subscription = wcs_get_subscription( $subscription_id );
-						echo '<dd>' . esc_html__( 'Subscription' , 'woocommerce-subscriptions-gifting' ) . ' <a href="' . esc_url( wcs_get_edit_post_link( $subscription->id ) ) . '">#' . esc_html( $subscription->get_order_number() ) . '</a></dd>';
+						echo '<dd>' . esc_html__( 'Subscription' , 'woocommerce-subscriptions-gifting' ) . ' <a href="' . esc_url( wcs_get_edit_post_link( wcsg_get_objects_id( $subscription ) ) ) . '">#' . esc_html( $subscription->get_order_number() ) . '</a></dd>';
 
 					}
 				}

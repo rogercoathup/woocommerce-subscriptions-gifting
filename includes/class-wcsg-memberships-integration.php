@@ -61,7 +61,7 @@ class WCSG_Memberships_Integration {
 
 					if ( $plan->has_product( $product_id ) ) {
 						foreach ( $grant_access_to_recipients as $recipient_user_id ) {
-							$plan->grant_access_from_purchase( $recipient_user_id, $product_id, $order->id );
+							$plan->grant_access_from_purchase( $recipient_user_id, $product_id, wcsg_get_objects_id( $order ) );
 						}
 					}
 				}
@@ -171,7 +171,7 @@ class WCSG_Memberships_Integration {
 					return;
 				}
 
-				update_post_meta( $args['user_membership_id'], '_subscription_id', $subscription->id );
+				update_post_meta( $args['user_membership_id'], '_subscription_id', wcsg_get_objects_id( $subscription ) );
 
 				// Update the membership end date to align it to the user's subscription
 				$wcm_subscriptions_integration_instance->update_related_membership_dates( $subscription, 'end', $subscription->get_date( 'end' ) );

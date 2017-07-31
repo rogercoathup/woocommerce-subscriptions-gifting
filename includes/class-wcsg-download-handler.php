@@ -125,7 +125,7 @@ class WCSG_Download_Handler {
 
 		if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
 
-			self::$subscription_download_permissions = self::get_subscription_download_permissions( $subscription->id );
+			self::$subscription_download_permissions = self::get_subscription_download_permissions( wcsg_get_objects_id( $subscription ) );
 		}
 	}
 
@@ -380,7 +380,7 @@ class WCSG_Download_Handler {
 			WHERE user_id = %d
 			AND order_id = %d
 			AND product_id = %d
-		", $user_id, $order->id, $product_id ) );
+		", $user_id, wcsg_get_objects_id( $order ), $product_id ) );
 
 		$files   = array();
 		$product = wc_get_product( $product_id );

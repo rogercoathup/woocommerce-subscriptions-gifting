@@ -68,6 +68,8 @@ require_once( 'includes/class-wcsg-admin.php' );
 
 require_once( 'includes/class-wcsg-recipient-addresses.php' );
 
+require_once( 'includes/wcsg-compatibility-functions.php' );
+
 class WCS_Gifting {
 
 	public static $plugin_file = __FILE__;

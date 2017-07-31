@@ -39,7 +39,7 @@ class WCSG_Email_Completed_Renewal_Order extends WCS_Email_Completed_Renewal_Ord
 			$this->object    = wc_get_order( $order_id );
 			$subscriptions   = wcs_get_subscriptions_for_renewal_order( $order_id );
 			$subscriptions   = array_values( $subscriptions );
-			$recipient_id    = get_post_meta( $subscriptions[0]->id, '_recipient_user', true );
+			$recipient_id    = get_post_meta( wcsg_get_objects_id( $subscriptions[0] ), '_recipient_user', true );
 			$this->recipient = get_userdata( $recipient_id )->user_email;
 		}
 

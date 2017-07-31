@@ -17,7 +17,7 @@
 	<tbody>
 		<?php foreach ( $subscription_orders as $subscription_order ) {
 			$order        = wc_get_order( $subscription_order );
-			$display_link = current_user_can( 'view_order', $order->id );
+			$display_link = current_user_can( 'view_order', wcsg_get_objects_id( $order ) );
 			$item_count = $order->get_item_count();
 			?><tr class="order">
 				<td class="order-number" data-title="<?php esc_attr_e( 'Order Number', 'woocommerce-subscriptions-gifting' ); ?>">
