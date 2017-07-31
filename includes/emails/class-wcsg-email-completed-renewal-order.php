@@ -44,11 +44,14 @@ class WCSG_Email_Completed_Renewal_Order extends WCS_Email_Completed_Renewal_Ord
 		}
 
 		$order_date_index = array_search( '{order_date}', $this->find );
+		$date_format      = is_callable( 'wc_date_format' ) ? wc_date_format() : woocommerce_date_format();
+		$order_date_time  = is_callable( array( $this->object, 'get_date_created' ) ) ? $this->object->get_date_created()->getTimestamp() : strtotime( $this->object->order_date );
+
 		if ( false === $order_date_index ) {
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( $date_format, $order_date_time );
 		} else {
-			$this->replace[ $order_date_index ] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[ $order_date_index ] = date_i18n( $date_format, $order_date_time );
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {

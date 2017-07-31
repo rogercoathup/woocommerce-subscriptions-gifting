@@ -191,7 +191,7 @@ class WCSG_Recipient_Management {
 		if ( WCS_Gifting::is_gifted_subscription( $subscription ) && get_current_user_id() == WCS_Gifting::get_recipient_user( $subscription ) ) {
 
 			// Make sure subscription suspension count hasn't been reached
-			$suspension_count    = $subscription->suspension_count;
+			$suspension_count    = wcsg_get_objects_property( $subscription, 'suspension_count' );
 			$allowed_suspensions = get_option( WC_Subscriptions_Admin::$option_prefix . '_max_customer_suspensions', 0 );
 
 			if ( 'unlimited' === $allowed_suspensions || $allowed_suspensions > $suspension_count ) { // 0 not > anything so prevents a customer ever being able to suspend
