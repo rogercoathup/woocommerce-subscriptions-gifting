@@ -503,6 +503,32 @@ class WCS_Gifting {
 	}
 
 	/**
+	 * Create a recipient user account.
+	 *
+	 * @param string $recipient_email
+	 * @return int $recipient_user_id
+	 */
+	public static function create_recipient_user( $recipient_email ) {
+		$username = explode( '@', $recipient_email );
+		$username = sanitize_user( $username[0], true );
+		$counter  = 1;
+
+		$original_username = $username;
+
+		while ( username_exists( $username ) ) {
+			$username = $original_username . $counter;
+			$counter++;
+		}
+
+		$password = wp_generate_password();
+		$recipient_user_id = wc_create_new_customer( $recipient_email, $username, $password );
+
+		// set a flag to force the user to update/set account information on login
+		update_user_meta( $recipient_user_id, 'wcsg_update_account', 'true' );
+		return $recipient_user_id;
+	}
+
+	/**
 	 * Retrieve the recipient user ID from a subscription
 	 *
 	 * @param WC_Subscription $subscription

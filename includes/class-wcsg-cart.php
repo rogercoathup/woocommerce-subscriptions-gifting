@@ -199,5 +199,37 @@ class WCSG_Cart {
 
 		return $cart_contains_gifted_renewal;
 	}
+
+	/**
+	 * Retrieve a recipient user's ID from a cart item. This function will also create a new user
+	 * if the recipient user's email doesn't already exist.
+	 *
+	 * @param array $cart_item
+	 * @return string the recipient id. If the cart item doesn't belong to a recipient an empty string is returned
+	 * @since 1.0.1
+	 */
+	public static function get_recipient_from_cart_item( $cart_item ) {
+		$recipient_email   = '';
+		$recipient_user_id = '';
+
+		if ( isset( $cart_item['subscription_renewal'] ) && WCS_Gifting::is_gifted_subscription( $cart_item['subscription_renewal']['subscription_id'] ) ) {
+			$recipient_id    = get_post_meta( $cart_item['subscription_renewal']['subscription_id'], '_recipient_user', true );
+			$recipient       = get_user_by( 'id', $recipient_id );
+			$recipient_email = $recipient->user_email;
+		} else if ( isset( $cart_item['wcsg_gift_recipients_email'] ) ) {
+			$recipient_email = $cart_item['wcsg_gift_recipients_email'];
+		}
+
+		if ( ! empty( $recipient_email ) ) {
+			$recipient_user_id = email_exists( $recipient_email );
+
+			// Create a new user if the recipient's email doesn't already exist
+			if ( ! $recipient_user_id ) {
+				$recipient_user_id = WCS_Gifting::create_recipient_user( $recipient_email );
+			}
+		}
+
+		return $recipient_user_id;
+	}
 }
 WCSG_Cart::init();
