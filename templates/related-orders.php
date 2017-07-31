@@ -36,7 +36,7 @@
 					<?php
 					echo esc_html( wc_get_order_status_name( $order->get_status() ) );
 					if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order ) ) ) {
-						if ( wp_get_current_user()->ID != $order->get_user_id() ) {
+						if ( get_current_user_id() != $order->get_user_id() ) {
 							echo '</br><small>' . esc_html( 'Purchased by ' . $order->get_user()->display_name ) . '</small>';
 						}
 					}

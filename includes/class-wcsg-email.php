@@ -175,9 +175,11 @@ class WCSG_Email {
 			if ( isset( $item['wcsg_gift_recipients_email'] ) ) {
 				if ( $item['wcsg_gift_recipients_email'] == $new_customer_data['user_email'] ) {
 					WC()->mailer();
-					$user_password = $new_customer_data['user_pass'];
-					$current_user = wp_get_current_user();
-					$subscription_purchaser = WCS_Gifting::get_user_display_name( $current_user->ID );
+
+					$user_password          = $new_customer_data['user_pass'];
+					$current_user_id        = get_current_user_id();
+					$subscription_purchaser = WCS_Gifting::get_user_display_name( $current_user_id );
+
 					do_action( 'wcsg_created_customer_notification', $customer_id, $user_password, $subscription_purchaser );
 					break;
 				}

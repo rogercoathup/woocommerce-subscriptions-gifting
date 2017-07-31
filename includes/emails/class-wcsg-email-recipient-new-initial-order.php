@@ -38,7 +38,7 @@ class WCSG_Email_Recipient_New_Initial_Order extends WC_Email {
 			$this->object             = get_user_by( 'id', $recipient_user );
 			$this->recipient          = stripslashes( $this->object->user_email );
 			$subscription             = wcs_get_subscription( $recipient_subscriptions[0] );
-			$this->subscription_owner = WCS_Gifting::get_user_display_name( $subscription->customer_user );
+			$this->subscription_owner = WCS_Gifting::get_user_display_name( $subscription->get_user_id() );
 			$this->subscriptions      = $recipient_subscriptions;
 		}
 

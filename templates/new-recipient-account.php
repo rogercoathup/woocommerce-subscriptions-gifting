@@ -28,7 +28,7 @@ foreach ( $form_fields as $key => $field ) {
 wp_nonce_field( 'wcsg_new_recipient_data', '_wcsgnonce' );
 
 ?>
-<input type="hidden" name="wcsg_new_recipient_customer" value="<?php echo esc_attr( wp_get_current_user()->ID ); ?>" />
+<input type="hidden" name="wcsg_new_recipient_customer" value="<?php echo esc_attr( get_current_user_id() ); ?>" />
 <input type="submit" class="button" name="save_address" value="<?php esc_html_e( 'Save', 'woocommerce-subscriptions-gifting' ); ?>" />
 
 </form>
