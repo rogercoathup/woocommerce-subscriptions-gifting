@@ -179,8 +179,10 @@ class WCSG_Memberships_Integration {
 			// If the member user is the purchaser, set the linked subscription to their subscription just in case
 			} else {
 				foreach ( $subscriptions_in_order as $subscription ) {
-					if ( ! isset( $subscription->recipient_user ) ) {
-						update_post_meta( $args['user_membership_id'], '_subscription_id', $subscription->id );
+					$recipient_user_id = WCS_Gifting::get_recipient_user( $subscription );
+
+					if ( empty( $recipient_user_id ) ) {
+						update_post_meta( $args['user_membership_id'], '_subscription_id', wcsg_get_objects_id( $subscription ) );
 						$wcm_subscriptions_integration_instance->update_related_membership_dates( $subscription, 'end', $subscription->get_date( 'end' ) );
 					}
 				}

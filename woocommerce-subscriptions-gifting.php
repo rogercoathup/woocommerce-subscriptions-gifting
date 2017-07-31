@@ -405,12 +405,18 @@ class WCS_Gifting {
 	 * @return bool
 	 */
 	public static function is_gifted_subscription( $subscription ) {
+		$is_gifted_subscription = false;
 
 		if ( ! $subscription instanceof WC_Subscription ) {
 			$subscription = wcs_get_subscription( $subscription );
 		}
 
-		return wcs_is_subscription( $subscription ) && ! empty( $subscription->recipient_user ) && is_numeric( $subscription->recipient_user );
+		if ( wcs_is_subscription( $subscription ) ) {
+			$recipient_user_id      = self::get_recipient_user( $subscription );
+			$is_gifted_subscription = ! empty( $recipient_user_id ) && is_numeric( $recipient_user_id );
+		}
+
+		return $is_gifted_subscription;
 	}
 
 	/**
@@ -494,5 +500,24 @@ class WCS_Gifting {
 		return ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? substr( $order_item['item_meta']['wcsg_recipient'][0], strlen( 'wcsg_recipient_id_' ) ) : false;
 	}
 
+	/**
+	 * Retrieve the recipient user ID from a subscription
+	 *
+	 * @param WC_Subscription $subscription
+	 * @return string $recipient_user_id the recipient's user ID. returns an empty string if there is no recipient set.
+	 */
+	public static function get_recipient_user( $subscription ) {
+		$recipient_user_id = '';
+
+		if ( method_exists( $subscription, 'get_meta' ) ) {
+			if ( $subscription->meta_exists( '_recipient_user' ) ) {
+				$recipient_user_id = $subscription->get_meta( '_recipient_user' );
+			}
+		} else { // WC < 3.0
+			$recipient_user_id = $subscription->recipient_user;
+		}
+
+		return $recipient_user_id;
+	}
 }
 WCS_Gifting::init();

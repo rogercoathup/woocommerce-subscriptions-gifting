@@ -48,10 +48,10 @@ class WCSG_Cart {
 			$cart_item    = wcs_cart_contains_renewal();
 			$subscription = wcs_get_subscription( $cart_item['subscription_renewal']['subscription_id'] );
 
-			if ( isset( $subscription->recipient_user ) ) {
-				$recipient_user = get_userdata( $subscription->recipient_user );
+			if ( $recipient_user_id = WCS_Gifting::get_recipient_user( $subscription ) ) {
+				$recipient_user_data = get_userdata( $recipient_user_id );
 
-				$quantity .= self::generate_static_gifting_html( $cart_item_key, $recipient_user->user_email );
+				$quantity .= self::generate_static_gifting_html( $cart_item_key, $recipient_user_data->user_email );
 			}
 		} else if ( ! empty( $cart_item['wcsg_gift_recipients_email'] ) ) {
 			$quantity .= self::generate_static_gifting_html( $cart_item_key, $cart_item['wcsg_gift_recipients_email'] );
@@ -125,13 +125,14 @@ class WCSG_Cart {
 	}
 
 	/**
-	 * Returns the relevent html (static/flat, interactive or none at all) depending on
+	 * Returns the relevant html (static/flat, interactive or none at all) depending on
 	 * whether the cart item is a giftable cart item or is a gifted renewal item.
 	 *
 	 * @param array $cart_item
 	 * @param string $cart_item_key
 	 */
 	public static function maybe_display_gifting_information( $cart_item, $cart_item_key ) {
+		$gifted_cart_item_html = '';
 
 		if ( self::is_giftable_item( $cart_item ) ) {
 			ob_start();
@@ -139,18 +140,19 @@ class WCSG_Cart {
 			$email = ( empty( $cart_item['wcsg_gift_recipients_email'] ) ) ? '' : $cart_item['wcsg_gift_recipients_email'];
 			wc_get_template( 'html-add-recipient.php', array( 'email_field_args' => WCS_Gifting::get_recipient_email_field_args( $email ), 'id' => $cart_item_key, 'email' => $email ),'' , plugin_dir_path( WCS_Gifting::$plugin_file ) . 'templates/' );
 
-			return ob_get_clean();
+			$gifted_cart_item_html = ob_get_clean();
 		} else if ( wcs_cart_contains_renewal() ) {
-
 			$cart_item    = wcs_cart_contains_renewal();
 			$subscription = wcs_get_subscription( $cart_item['subscription_renewal']['subscription_id'] );
 
-			if ( isset( $subscription->recipient_user ) ) {
-				$recipient_user = get_userdata( $subscription->recipient_user );
+			if ( $recipient_user_id = WCS_Gifting::get_recipient_user( $subscription ) ) {
+				$recipient_user_data = get_userdata( $recipient_user_id );
 
-				return self::generate_static_gifting_html( $cart_item_key, $recipient_user->user_email );
+				$gifted_cart_item_html = self::generate_static_gifting_html( $cart_item_key, $recipient_user_data->user_email );
 			}
 		}
+
+		return $gifted_cart_item_html;
 	}
 
 	/**
@@ -168,7 +170,7 @@ class WCSG_Cart {
 			$recipient_user_id = substr( $line_item['wcsg_recipient'], strlen( 'wcsg_recipient_id_' ) );
 
 		} else if ( ! array_key_exists( 'subscription_renewal', $cart_item_data ) && WCS_Gifting::is_gifted_subscription( $subscription ) ) {
-			$recipient_user_id = $subscription->recipient_user;
+			$recipient_user_id = WCS_Gifting::get_recipient_user( $subscription );
 		}
 
 		if ( ! empty( $recipient_user_id ) ) {

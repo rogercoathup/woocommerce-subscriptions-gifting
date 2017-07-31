@@ -115,10 +115,12 @@ class WCSG_Email {
 			WC()->mailer();
 			foreach ( $subscriptions as $subscription ) {
 				if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
-					if ( ! in_array( $subscription->recipient_user, $processed_recipients ) ) {
-						$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $subscription->recipient_user, $order_id );
-						do_action( 'wcsg_new_order_recipient_notification', $subscription->recipient_user, $recipient_subscriptions );
-						array_push( $processed_recipients, $subscription->recipient_user );
+					$recipient_user_id = WCS_Gifting::get_recipient_user( $subscription );
+
+					if ( ! in_array( $recipient_user_id, $processed_recipients ) ) {
+						$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $recipient_user_id, $order_id );
+						do_action( 'wcsg_new_order_recipient_notification', $recipient_user_id, $recipient_subscriptions );
+						array_push( $processed_recipients, $recipient_user_id );
 					}
 				}
 			}

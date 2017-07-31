@@ -37,14 +37,13 @@ class WCSG_Download_Handler {
 	 */
 	public static function get_item_download_links( $files, $item, $order ) {
 
-		if ( ! empty( $order->recipient_user ) ) {
-			$subscription_recipient = get_user_by( 'id', $order->recipient_user );
-			$user_id                = ( wcs_is_subscription( $order ) && wcs_is_view_subscription_page() ) ? get_current_user_id() : $order->customer_user;
-			$mailer                 = WC()->mailer();
+		if ( $recipient_user_id = WCS_Gifting::get_recipient_user( $order ) ) {
+			$user_id = ( wcs_is_subscription( $order ) && wcs_is_view_subscription_page() ) ? get_current_user_id() : $order->get_user_id();
+			$mailer  = WC()->mailer();
 
 			foreach ( $mailer->emails as $email ) {
 				if ( isset( $email->wcsg_sending_recipient_email ) ) {
-					$user_id = $order->recipient_user;
+					$user_id = $recipient_user_id;
 					break;
 				}
 			}
@@ -65,7 +64,7 @@ class WCSG_Download_Handler {
 
 		$subscription = wcs_get_subscription( $data['order_id'] );
 
-		if ( wcs_is_subscription( $subscription ) && isset( $subscription->recipient_user ) ) {
+		if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
 
 			$can_purchaser_download = ( 'yes' == get_option( WCSG_Admin::$option_prefix . '_downloadable_products', 'no' ) ) ? true : false;
 
@@ -77,7 +76,7 @@ class WCSG_Download_Handler {
 				add_filter( 'woocommerce_downloadable_file_permission_data', __CLASS__ . '::grant_recipient_download_permissions', 11 );
 			}
 
-			$recipient_id       = $subscription->recipient_user;
+			$recipient_id       = WCS_Gifting::get_recipient_user( $subscription );
 			$recipient          = get_user_by( 'id', $recipient_id );
 			$data['user_id']    = $recipient_id;
 			$data['user_email'] = $recipient->user_email;
@@ -152,7 +151,7 @@ class WCSG_Download_Handler {
 					<input type="hidden" class="wcsg_download_permission_id" name="wcsg_download_permission_ids[<?php echo esc_attr( $index ); ?>]" value="<?php echo absint( $download->permission_id ); ?>" />
 					<input type="hidden" class="wcsg_download_permission_id" name="wcsg_download_user_ids[<?php echo esc_attr( $index ); ?>]" value="<?php echo absint( $download->user_id ); ?>" /><?php
 
-					$user_role = ( $download->user_id == $subscription->recipient_user ) ? __( 'Recipient', 'woocommerce-subscriptions-gifting' ) : __( 'Purchaser', 'woocommerce-subscriptions-gifting' );
+					$user_role = ( $download->user_id == WCS_Gifting::get_recipient_user( $subscription ) ) ? __( 'Recipient', 'woocommerce-subscriptions-gifting' ) : __( 'Purchaser', 'woocommerce-subscriptions-gifting' );
 					$user      = get_userdata( $download->user_id );
 					$user_name = ucfirst( $user->first_name ) . ( ( ! empty( $user->last_name ) ) ? ' ' . ucfirst( $user->last_name ) : '' );
 
@@ -205,7 +204,7 @@ class WCSG_Download_Handler {
 				$format = array( '%s', '%s' );
 
 				// if we're updating the purchaser's permissions, update the download user id and email, in case it has changed
-				if ( $user_ids[ $index ] != $subscription->recipient_user ) {
+				if ( WCS_Gifting::get_recipient_user( $subscription ) != $user_ids[ $index ] ) {
 					$data['user_id'] = absint( $_POST['customer_user'] );
 					$format[] = '%d';
 

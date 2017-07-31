@@ -28,7 +28,7 @@ class WCSG_Admin {
 
 		if ( 'order_title' == $column && WCS_Gifting::is_gifted_subscription( $subscription ) ) {
 
-			$recipient_id   = $subscription->recipient_user;
+			$recipient_id   = WCS_Gifting::get_recipient_user( $subscription );
 			$recipient_user = get_userdata( $recipient_id );
 			$recipient_name = '<a href="' . esc_url( get_edit_user_link( $recipient_id ) ) . '">';
 
