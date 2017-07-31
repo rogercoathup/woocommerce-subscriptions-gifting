@@ -33,7 +33,7 @@ class WCSG_Email_Completed_Renewal_Order extends WCS_Email_Completed_Renewal_Ord
 	/**
 	 * trigger function.
 	 */
-	function trigger( $order_id ) {
+	function trigger( $order_id, $order = null ) {
 
 		if ( $order_id ) {
 			$this->object    = wc_get_order( $order_id );
