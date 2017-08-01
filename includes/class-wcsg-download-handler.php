@@ -388,7 +388,13 @@ class WCSG_Download_Handler {
 		foreach ( $downloads as $download ) {
 
 			if ( $product->has_file( $download->download_id ) ) {
-				$files[ $download->download_id ]                 = $product->get_file( $download->download_id );
+				if ( wcsg_is_woocommerce_pre( '3.0' ) ) {
+					$files[ $download->download_id ] = $product->get_file( $download->download_id );
+				} else {
+					$file                            = $product->get_file( $download->download_id );
+					$files[ $download->download_id ] = $file->get_data();
+				}
+
 				$files[ $download->download_id ]['download_url'] = add_query_arg(
 					array(
 						'download_file' => $product_id,
