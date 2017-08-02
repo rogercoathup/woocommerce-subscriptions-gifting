@@ -221,7 +221,7 @@ class WCSG_Email {
 			return $heading;
 		}
 
-		$user_id = $order->customer_user;
+		$user_id = $order->get_user_id();
 		$mailer  = WC()->mailer();
 		$sending_email;
 

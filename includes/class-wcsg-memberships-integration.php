@@ -108,7 +108,7 @@ class WCSG_Memberships_Integration {
 
 			foreach ( $order->get_items() as $order_item_id => $order_item ) {
 
-				$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->customer_user;
+				$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->get_user_id();
 
 				if ( in_array( $order_item['product_id'], $all_access_granting_product_ids ) ) {
 					$user_unique_product_ids[ $user_id ][] = $order_item['product_id'];
@@ -161,7 +161,7 @@ class WCSG_Memberships_Integration {
 				: wc_memberships()->get_subscriptions_integration();
 
 			// check if the member user is a recipient
-			if ( $order->user_id != $args['user_id'] ) {
+			if ( $order->get_user_id() != $args['user_id'] ) {
 				$recipient_subscriptions         = WCSG_Recipient_Management::get_recipient_subscriptions( $args['user_id'] );
 				$recipient_subscription_in_order = array_intersect( array_keys( $subscriptions_in_order ), $recipient_subscriptions );
 

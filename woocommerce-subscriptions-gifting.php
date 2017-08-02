@@ -499,7 +499,14 @@ class WCS_Gifting {
 	 * @return mixed bool|int The recipient user id or false if the order item is not gifted
 	 */
 	public static function get_order_item_recipient_user_id( $order_item ) {
-		return ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? substr( $order_item['item_meta']['wcsg_recipient'][0], strlen( 'wcsg_recipient_id_' ) ) : false;
+
+		if ( is_a( $order_item, 'WC_Order_Item' ) && $order_item->meta_exists( 'wcsg_recipient' ) ) {
+			$raw_recipient_meta = $order_item->get_meta( 'wcsg_recipient' );
+		} elseif ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) {
+			$raw_recipient_meta = $order_item['item_meta']['wcsg_recipient'][0];
+		}
+
+		return isset( $raw_recipient_meta ) ? substr( $raw_recipient_meta, strlen( 'wcsg_recipient_id_' ) ) : false;
 	}
 
 	/**
