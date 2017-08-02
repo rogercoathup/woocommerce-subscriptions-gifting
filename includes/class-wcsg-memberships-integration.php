@@ -61,7 +61,7 @@ class WCSG_Memberships_Integration {
 
 					if ( $plan->has_product( $product_id ) ) {
 						foreach ( $grant_access_to_recipients as $recipient_user_id ) {
-							$plan->grant_access_from_purchase( $recipient_user_id, $product_id, $order->id );
+							$plan->grant_access_from_purchase( $recipient_user_id, $product_id, wcsg_get_objects_id( $order ) );
 						}
 					}
 				}
@@ -108,7 +108,7 @@ class WCSG_Memberships_Integration {
 
 			foreach ( $order->get_items() as $order_item_id => $order_item ) {
 
-				$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->customer_user;
+				$user_id = ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? WCS_Gifting::get_order_item_recipient_user_id( $order_item ) : $order->get_user_id();
 
 				if ( in_array( $order_item['product_id'], $all_access_granting_product_ids ) ) {
 					$user_unique_product_ids[ $user_id ][] = $order_item['product_id'];
@@ -161,7 +161,7 @@ class WCSG_Memberships_Integration {
 				: wc_memberships()->get_subscriptions_integration();
 
 			// check if the member user is a recipient
-			if ( $order->user_id != $args['user_id'] ) {
+			if ( $order->get_user_id() != $args['user_id'] ) {
 				$recipient_subscriptions         = WCSG_Recipient_Management::get_recipient_subscriptions( $args['user_id'] );
 				$recipient_subscription_in_order = array_intersect( array_keys( $subscriptions_in_order ), $recipient_subscriptions );
 
@@ -171,7 +171,7 @@ class WCSG_Memberships_Integration {
 					return;
 				}
 
-				update_post_meta( $args['user_membership_id'], '_subscription_id', $subscription->id );
+				update_post_meta( $args['user_membership_id'], '_subscription_id', wcsg_get_objects_id( $subscription ) );
 
 				// Update the membership end date to align it to the user's subscription
 				$wcm_subscriptions_integration_instance->update_related_membership_dates( $subscription, 'end', $subscription->get_date( 'end' ) );
@@ -179,8 +179,10 @@ class WCSG_Memberships_Integration {
 			// If the member user is the purchaser, set the linked subscription to their subscription just in case
 			} else {
 				foreach ( $subscriptions_in_order as $subscription ) {
-					if ( ! isset( $subscription->recipient_user ) ) {
-						update_post_meta( $args['user_membership_id'], '_subscription_id', $subscription->id );
+					$recipient_user_id = WCS_Gifting::get_recipient_user( $subscription );
+
+					if ( empty( $recipient_user_id ) ) {
+						update_post_meta( $args['user_membership_id'], '_subscription_id', wcsg_get_objects_id( $subscription ) );
 						$wcm_subscriptions_integration_instance->update_related_membership_dates( $subscription, 'end', $subscription->get_date( 'end' ) );
 					}
 				}

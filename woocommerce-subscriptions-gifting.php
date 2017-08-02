@@ -68,6 +68,8 @@ require_once( 'includes/class-wcsg-admin.php' );
 
 require_once( 'includes/class-wcsg-recipient-addresses.php' );
 
+require_once( 'includes/wcsg-compatibility-functions.php' );
+
 class WCS_Gifting {
 
 	public static $plugin_file = __FILE__;
@@ -405,12 +407,18 @@ class WCS_Gifting {
 	 * @return bool
 	 */
 	public static function is_gifted_subscription( $subscription ) {
+		$is_gifted_subscription = false;
 
 		if ( ! $subscription instanceof WC_Subscription ) {
 			$subscription = wcs_get_subscription( $subscription );
 		}
 
-		return wcs_is_subscription( $subscription ) && ! empty( $subscription->recipient_user ) && is_numeric( $subscription->recipient_user );
+		if ( wcs_is_subscription( $subscription ) ) {
+			$recipient_user_id      = self::get_recipient_user( $subscription );
+			$is_gifted_subscription = ! empty( $recipient_user_id ) && is_numeric( $recipient_user_id );
+		}
+
+		return $is_gifted_subscription;
 	}
 
 	/**
@@ -491,8 +499,60 @@ class WCS_Gifting {
 	 * @return mixed bool|int The recipient user id or false if the order item is not gifted
 	 */
 	public static function get_order_item_recipient_user_id( $order_item ) {
-		return ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) ? substr( $order_item['item_meta']['wcsg_recipient'][0], strlen( 'wcsg_recipient_id_' ) ) : false;
+
+		if ( is_a( $order_item, 'WC_Order_Item' ) && $order_item->meta_exists( 'wcsg_recipient' ) ) {
+			$raw_recipient_meta = $order_item->get_meta( 'wcsg_recipient' );
+		} elseif ( isset( $order_item['item_meta']['wcsg_recipient'] ) ) {
+			$raw_recipient_meta = $order_item['item_meta']['wcsg_recipient'][0];
+		}
+
+		return isset( $raw_recipient_meta ) ? substr( $raw_recipient_meta, strlen( 'wcsg_recipient_id_' ) ) : false;
 	}
 
+	/**
+	 * Create a recipient user account.
+	 *
+	 * @param string $recipient_email
+	 * @return int $recipient_user_id
+	 */
+	public static function create_recipient_user( $recipient_email ) {
+		$username = explode( '@', $recipient_email );
+		$username = sanitize_user( $username[0], true );
+		$counter  = 1;
+
+		$original_username = $username;
+
+		while ( username_exists( $username ) ) {
+			$username = $original_username . $counter;
+			$counter++;
+		}
+
+		$password = wp_generate_password();
+		$recipient_user_id = wc_create_new_customer( $recipient_email, $username, $password );
+
+		// set a flag to force the user to update/set account information on login
+		update_user_meta( $recipient_user_id, 'wcsg_update_account', 'true' );
+		return $recipient_user_id;
+	}
+
+	/**
+	 * Retrieve the recipient user ID from a subscription
+	 *
+	 * @param WC_Subscription $subscription
+	 * @return string $recipient_user_id the recipient's user ID. returns an empty string if there is no recipient set.
+	 */
+	public static function get_recipient_user( $subscription ) {
+		$recipient_user_id = '';
+
+		if ( method_exists( $subscription, 'get_meta' ) ) {
+			if ( $subscription->meta_exists( '_recipient_user' ) ) {
+				$recipient_user_id = $subscription->get_meta( '_recipient_user' );
+			}
+		} else { // WC < 3.0
+			$recipient_user_id = $subscription->recipient_user;
+		}
+
+		return $recipient_user_id;
+	}
 }
 WCS_Gifting::init();

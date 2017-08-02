@@ -33,22 +33,25 @@ class WCSG_Email_Completed_Renewal_Order extends WCS_Email_Completed_Renewal_Ord
 	/**
 	 * trigger function.
 	 */
-	function trigger( $order_id ) {
+	function trigger( $order_id, $order = null ) {
 
 		if ( $order_id ) {
 			$this->object    = wc_get_order( $order_id );
 			$subscriptions   = wcs_get_subscriptions_for_renewal_order( $order_id );
 			$subscriptions   = array_values( $subscriptions );
-			$recipient_id    = get_post_meta( $subscriptions[0]->id, '_recipient_user', true );
+			$recipient_id    = get_post_meta( wcsg_get_objects_id( $subscriptions[0] ), '_recipient_user', true );
 			$this->recipient = get_userdata( $recipient_id )->user_email;
 		}
 
 		$order_date_index = array_search( '{order_date}', $this->find );
+		$date_format      = is_callable( 'wc_date_format' ) ? wc_date_format() : woocommerce_date_format();
+		$order_date_time  = is_callable( array( $this->object, 'get_date_created' ) ) ? $this->object->get_date_created()->getTimestamp() : strtotime( $this->object->order_date );
+
 		if ( false === $order_date_index ) {
 			$this->find[] = '{order_date}';
-			$this->replace[] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[] = date_i18n( $date_format, $order_date_time );
 		} else {
-			$this->replace[ $order_date_index ] = date_i18n( woocommerce_date_format(), strtotime( $this->object->order_date ) );
+			$this->replace[ $order_date_index ] = date_i18n( $date_format, $order_date_time );
 		}
 
 		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {

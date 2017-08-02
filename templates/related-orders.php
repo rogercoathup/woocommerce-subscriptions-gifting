@@ -17,8 +17,16 @@
 	<tbody>
 		<?php foreach ( $subscription_orders as $subscription_order ) {
 			$order        = wc_get_order( $subscription_order );
-			$display_link = current_user_can( 'view_order', $order->id );
+			$display_link = current_user_can( 'view_order', wcsg_get_objects_id( $order ) );
 			$item_count = $order->get_item_count();
+
+			if ( wcsg_is_woocommerce_pre( '3.0' ) ) {
+				$order_date = $order->order_date;
+			} else {
+				$order_date = $order->get_date_created();
+				$order_date->format( 'Y-m-d H:i:s' );
+			}
+
 			?><tr class="order">
 				<td class="order-number" data-title="<?php esc_attr_e( 'Order Number', 'woocommerce-subscriptions-gifting' ); ?>">
 					<?php if ( $display_link ) : ?>
@@ -30,13 +38,13 @@
 					<?php endif; ?>
 				</td>
 				<td class="order-date" data-title="<?php esc_attr_e( 'Date', 'woocommerce-subscriptions-gifting' ); ?>">
-					<time datetime="<?php echo esc_attr( date( 'Y-m-d', strtotime( $order->order_date ) ) ); ?>" title="<?php echo esc_attr( strtotime( $order->order_date ) ); ?>"><?php echo wp_kses_post( date_i18n( get_option( 'date_format' ), strtotime( $order->order_date ) ) ); ?></time>
+					<time datetime="<?php echo esc_attr( date( 'Y-m-d', strtotime( $order_date ) ) ); ?>" title="<?php echo esc_attr( strtotime( $order_date ) ); ?>"><?php echo wp_kses_post( date_i18n( get_option( 'date_format' ), strtotime( $order_date ) ) ); ?></time>
 				</td>
 				<td class="order-status" data-title="<?php esc_attr_e( 'Status', 'woocommerce-subscriptions-gifting' ); ?>" style="text-align:left; white-space:nowrap;">
 					<?php
 					echo esc_html( wc_get_order_status_name( $order->get_status() ) );
 					if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( 'pending', 'failed' ), $order ) ) ) {
-						if ( wp_get_current_user()->ID != $order->get_user_id() ) {
+						if ( get_current_user_id() != $order->get_user_id() ) {
 							echo '</br><small>' . esc_html( 'Purchased by ' . $order->get_user()->display_name ) . '</small>';
 						}
 					}

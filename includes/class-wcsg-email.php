@@ -115,10 +115,12 @@ class WCSG_Email {
 			WC()->mailer();
 			foreach ( $subscriptions as $subscription ) {
 				if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
-					if ( ! in_array( $subscription->recipient_user, $processed_recipients ) ) {
-						$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $subscription->recipient_user, $order_id );
-						do_action( 'wcsg_new_order_recipient_notification', $subscription->recipient_user, $recipient_subscriptions );
-						array_push( $processed_recipients, $subscription->recipient_user );
+					$recipient_user_id = WCS_Gifting::get_recipient_user( $subscription );
+
+					if ( ! in_array( $recipient_user_id, $processed_recipients ) ) {
+						$recipient_subscriptions = WCSG_Recipient_Management::get_recipient_subscriptions( $recipient_user_id, $order_id );
+						do_action( 'wcsg_new_order_recipient_notification', $recipient_user_id, $recipient_subscriptions );
+						array_push( $processed_recipients, $recipient_user_id );
 					}
 				}
 			}
@@ -173,9 +175,11 @@ class WCSG_Email {
 			if ( isset( $item['wcsg_gift_recipients_email'] ) ) {
 				if ( $item['wcsg_gift_recipients_email'] == $new_customer_data['user_email'] ) {
 					WC()->mailer();
-					$user_password = $new_customer_data['user_pass'];
-					$current_user = wp_get_current_user();
-					$subscription_purchaser = WCS_Gifting::get_user_display_name( $current_user->ID );
+
+					$user_password          = $new_customer_data['user_pass'];
+					$current_user_id        = get_current_user_id();
+					$subscription_purchaser = WCS_Gifting::get_user_display_name( $current_user_id );
+
 					do_action( 'wcsg_created_customer_notification', $customer_id, $user_password, $subscription_purchaser );
 					break;
 				}
@@ -217,7 +221,7 @@ class WCSG_Email {
 			return $heading;
 		}
 
-		$user_id = $order->customer_user;
+		$user_id = $order->get_user_id();
 		$mailer  = WC()->mailer();
 		$sending_email;
 
