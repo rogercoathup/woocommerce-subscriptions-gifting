@@ -270,8 +270,9 @@ class WCSG_Download_Handler {
 			$subscription         = wcs_get_subscription( $order_id );
 			$download_permissions = self::get_subscription_download_permissions( $order_id, 'permission_id' );
 			$file_names           = array();
+			$billing_email        = is_callable( array( $subscription, 'get_billing_email' ) ) ? $subscription->get_billing_email() : $subscription->billing_email;
 
-			if ( ! $subscription->billing_email ) {
+			if ( ! $billing_email ) {
 				die();
 			}
 
@@ -281,7 +282,7 @@ class WCSG_Download_Handler {
 
 			foreach ( $product_ids as $product_id ) {
 				$product = wc_get_product( $product_id );
-				$files   = $product->get_files();
+				$files   = is_callable( array( $product, 'get_downloads' ) ) ? $product->get_downloads() : $product->get_files();
 
 				if ( $files ) {
 					foreach ( $files as $download_id => $file ) {
@@ -312,6 +313,10 @@ class WCSG_Download_Handler {
 
 					self::$subscription_download_permissions[ $loop ] = $download;
 
+					if ( class_exists( 'WC_Customer_Download' ) ) {
+						// Post WC 3.0 the template expects a WC_Customer_Download object rather than stdClass objects
+						$download = new WC_Customer_Download( $download );
+					}
 					include( plugin_dir_path( WC_PLUGIN_FILE ) . 'includes/admin/meta-boxes/views/html-order-download-permission.php' );
 				}
 			}
