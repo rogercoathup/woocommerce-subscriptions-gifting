@@ -14,6 +14,8 @@ class WCSG_Cart {
 		add_filter( 'woocommerce_add_to_cart_validation', __CLASS__ . '::prevent_products_in_gifted_renewal_orders', 10 );
 
 		add_filter( 'woocommerce_order_again_cart_item_data', __CLASS__ . '::add_recipient_to_resubscribe_initial_payment_item', 10, 3 );
+
+		add_filter( 'woocommerce_order_again_cart_item_data', __CLASS__ . '::remove_recipient_from_order_again_cart_item_meta', 10, 1 );
 	}
 
 	/**
@@ -230,6 +232,25 @@ class WCSG_Cart {
 		}
 
 		return $recipient_user_id;
+	}
+
+	/**
+	 * Remove recipient line item meta from order again cart item meta. This meta is re-added to the line item after
+	 * checkout and so doesn't need to copied through the cart in this way.
+	 *
+	 * @param array $cart_item_data
+	 * @return array $cart_item_data
+	 * @since 1.0.1
+	 */
+	public static function remove_recipient_from_order_again_cart_item_meta( $cart_item_data ) {
+
+		foreach ( array( 'subscription_renewal', 'subscription_resubscribe', 'subscription_initial_payment' ) as $subscription_order_again_key ) {
+			if ( isset( $cart_item_data[ $subscription_order_again_key ]['custom_line_item_meta']['wcsg_recipient'] ) ) {
+				unset( $cart_item_data[ $subscription_order_again_key ]['custom_line_item_meta']['wcsg_recipient'] );
+			}
+		}
+
+		return $cart_item_data;
 	}
 }
 WCSG_Cart::init();
