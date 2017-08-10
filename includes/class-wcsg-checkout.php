@@ -163,6 +163,12 @@ class WCSG_Checkout {
 		parse_str( $checkout_data, $checkout_data );
 
 		if ( isset( $checkout_data['recipient_email'] ) ) {
+			foreach ( WC()->cart->cart_contents as $key => $item ) {
+				if ( isset( $checkout_data['recipient_email'][ $key ] ) ) {
+					WCS_Gifting::update_cart_item_key( $item, $key, $checkout_data['recipient_email'][ $key ] );
+				}
+			}
+
 			WC()->session->set( 'wcsg_recipients', $checkout_data['recipient_email'] );
 		}
 	}

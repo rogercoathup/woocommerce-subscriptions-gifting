@@ -23,4 +23,19 @@ jQuery(document).ready(function($){
 			 $( 'input[type=submit][name=update_cart]').attr( 'clicked', 'true' );
 		}
 	});
+
+	$(document).on( 'focusout', '.recipient_email',function() {
+
+		if ( $( 'form.checkout' ).length === 0 ) {
+			return;
+		}
+
+		var new_recipient_email      = $( this ).val();
+		var existing_recipient_email = $( this ).prop( "defaultValue" );
+
+		// if the recipient has changed, update the checkout so recurring carts are updated
+		if ( new_recipient_email !== existing_recipient_email ) {
+			$( document.body ).trigger( 'update_checkout' );
+		}
+	});
 });
