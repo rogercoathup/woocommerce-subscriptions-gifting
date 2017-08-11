@@ -4,7 +4,14 @@ jQuery(document).ready(function($){
 			$(this).siblings('.woocommerce_subscriptions_gifting_recipient_email').slideDown( 250 );
 		} else {
 			$(this).siblings('.woocommerce_subscriptions_gifting_recipient_email').slideUp( 250 );
-			$(this).parent().find('.recipient_email').val('');
+
+			var recipient_email_element = $(this).parent().find('.recipient_email');
+			recipient_email_element.val('');
+
+			if ( $( 'form.checkout' ).length !== 0 ) {
+				// Trigger the event to update the checkout after the recipient field has been cleared
+				recipient_email_element.trigger( 'focusout' );
+			}
 		}
 	});
 
@@ -24,7 +31,12 @@ jQuery(document).ready(function($){
 		}
 	});
 
-	$(document).on( 'focusout', '.recipient_email',function() {
+	/*******************************************
+	 * Update checkout on input changed events *
+	 *******************************************/
+	var update_timer;
+
+	$(document).on( 'focusout', '.recipient_email', function() {
 
 		if ( $( 'form.checkout' ).length === 0 ) {
 			return;
@@ -33,9 +45,28 @@ jQuery(document).ready(function($){
 		var new_recipient_email      = $( this ).val();
 		var existing_recipient_email = $( this ).prop( "defaultValue" );
 
-		// if the recipient has changed, update the checkout so recurring carts are updated
+		// If the recipient has changed, update the checkout so recurring carts are updated
 		if ( new_recipient_email !== existing_recipient_email ) {
-			$( document.body ).trigger( 'update_checkout' );
+			update_checkout();
 		}
 	});
+
+	$(document).on( 'keydown', '.recipient_email', function( e ) {
+		var code = e.keyCode || e.which || 0;
+
+		if ( code === 9 ) {
+			return true;
+		}
+
+		reset_checkout_update_timer();
+		update_timer = setTimeout( update_checkout, '1500' );
+	});
+
+	function update_checkout() {
+		$( document.body ).trigger( 'update_checkout' );
+	}
+
+	function reset_checkout_update_timer() {
+		clearTimeout( update_timer );
+	}
 });
