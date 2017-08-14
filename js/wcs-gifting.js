@@ -10,7 +10,7 @@ jQuery(document).ready(function($){
 
 			if ( $( 'form.checkout' ).length !== 0 ) {
 				// Trigger the event to update the checkout after the recipient field has been cleared
-				recipient_email_element.trigger( 'focusout' );
+				update_checkout();
 			}
 		}
 	});
@@ -36,33 +36,41 @@ jQuery(document).ready(function($){
 	 *******************************************/
 	var update_timer;
 
-	$(document).on( 'focusout', '.recipient_email', function() {
+	$(document).on( 'change', '.recipient_email', function() {
 
 		if ( $( 'form.checkout' ).length === 0 ) {
 			return;
 		}
 
-		var new_recipient_email      = $( this ).val();
-		var existing_recipient_email = $( this ).prop( "defaultValue" );
-
-		// If the recipient has changed, update the checkout so recurring carts are updated
-		if ( new_recipient_email !== existing_recipient_email ) {
+		// Update the checkout so recurring carts are updated
+		if ( $( this ).hasClass( 'wcsg_needs_update' ) ) {
 			update_checkout();
 		}
 	});
 
-	$(document).on( 'keydown', '.recipient_email', function( e ) {
+	$(document).on( 'keyup', '.recipient_email', function( e ) {
 		var code = e.keyCode || e.which || 0;
 
-		if ( code === 9 ) {
+		if ( $( 'form.checkout' ).length === 0 || code === 9 ) {
 			return true;
 		}
 
+		var current_recipient  = $( this ).val();
+		var original_recipient = $( this ).attr( 'data-recipient' );
 		reset_checkout_update_timer();
-		update_timer = setTimeout( update_checkout, '1500' );
+
+		// If the recipient has changed since last load, mark the element as needing an update
+		if ( current_recipient !== original_recipient ) {
+			$( this ).addClass( 'wcsg_needs_update' );
+			update_timer = setTimeout( update_checkout, '1500' );
+		} else {
+			$( this ).removeClass( 'wcsg_needs_update' );
+		}
 	});
 
 	function update_checkout() {
+		reset_checkout_update_timer();
+		$( '.recipient_email' ).removeClass( 'wcsg_needs_update' );
 		$( document.body ).trigger( 'update_checkout' );
 	}
 
