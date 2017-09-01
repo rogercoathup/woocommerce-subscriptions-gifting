@@ -168,8 +168,8 @@ module.exports = function(grunt) {
 	/**
 	 * Grunt Deploy
 	 *
-	 * Run build, copy public files to /woothemes/ repo (i.e. not tests, grunt files etc.),
-	 * tag version in /woothemes repo and move Trello card to Deploy Update queue.
+	 * Run build, copy public files to /woocommerce/ repo (i.e. not tests, grunt files etc.),
+	 * tag version in /woocommerce repo and move Trello card to Deploy Update queue.
 	 *
 	 */
 	grunt.registerTask('deployTask', 'TODO: Add Description', function() {

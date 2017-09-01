@@ -6,7 +6,7 @@
  * Author: Prospress Inc.
  * Author URI: http://prospress.com/
  * Version: 1.0
- * License: GPLv2
+ * License: GPLv3
  *
  * GitHub Plugin URI: Prospress/woocommerce-subscriptions-gifting
  * GitHub Branch: master
@@ -33,14 +33,10 @@
 
 include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
-if ( ! function_exists( 'woothemes_queue_update' ) || ! function_exists( 'is_woocommerce_active' ) ) {
-	require_once( 'woo-includes/woo-functions.php' );
-}
-
 /**
  * Check if WooCommerce and Subscriptions are active.
  */
-if ( ! is_woocommerce_active() || version_compare( get_option( 'woocommerce_db_version' ), WCS_Gifting::$wc_minimum_supported_version, '<' ) ) {
+if ( ! is_plugin_active( 'woocommerce/woocommerce.php' ) || version_compare( get_option( 'woocommerce_db_version' ), WCS_Gifting::$wc_minimum_supported_version, '<' ) ) {
 	add_action( 'admin_notices', 'WCS_Gifting::plugin_dependency_notices' );
 	return;
 }
@@ -382,7 +378,7 @@ class WCS_Gifting {
 			<?php } else {
 				switch ( $plugin_name ) {
 					case 'WooCommerce Subscriptions':
-						$plugin_url = 'http://www.woothemes.com/products/woocommerce-subscriptions/';
+						$plugin_url = 'http://www.woocommerce.com/products/woocommerce-subscriptions/';
 						break;
 					case 'WooCommerce':
 						$plugin_url = 'http://wordpress.org/extend/plugins/woocommerce/';
