@@ -7,7 +7,7 @@
 		<label for="recipient_email[<?php echo esc_attr( $id ); ?>]">
 			<?php esc_html_e( "Recipient's Email Address:", 'woocommerce-subscriptions-gifting' ); ?>
 		</label>
-		<input type="email" class="input-text recipient_email" name="recipient_email[<?php echo esc_attr( $id ); ?>]" id="recipient_email[<?php echo esc_attr( $id ); ?>]" placeholder="<?php echo esc_attr( $email_field_args['placeholder'] ); ?>" value="<?php echo esc_attr( $email ); ?>"/>
+		<input data-recipient="<?php echo esc_attr( $email ); ?>" type="email" class="input-text recipient_email" name="recipient_email[<?php echo esc_attr( $id ); ?>]" id="recipient_email[<?php echo esc_attr( $id ); ?>]" placeholder="<?php echo esc_attr( $email_field_args['placeholder'] ); ?>" value="<?php echo esc_attr( $email ); ?>"/>
 		<?php wp_nonce_field( 'wcsg_add_recipient', '_wcsgnonce' ); ?>
 	</p>
 </fieldset>

@@ -32,16 +32,6 @@ class WCSG_Checkout {
 	 * @return int|quantity The quantity of the cart item with ui elements appended on
 	 */
 	public static function add_gifting_option_checkout( $quantity, $cart_item, $cart_item_key ) {
-
-		$recipients = WC()->session->get( 'wcsg_recipients' );
-
-		if ( ! empty( $recipients ) && isset( $recipients[ $cart_item_key ] ) ) {
-			$cart_item['wcsg_gift_recipients_email'] = $recipients[ $cart_item_key ];
-
-			unset( $recipients[ $cart_item_key ] );
-			WC()->session->set( 'wcsg_recipients', $recipients );
-		}
-
 		return $quantity . WCSG_Cart::maybe_display_gifting_information( $cart_item, $cart_item_key );
 	}
 
@@ -163,7 +153,12 @@ class WCSG_Checkout {
 		parse_str( $checkout_data, $checkout_data );
 
 		if ( isset( $checkout_data['recipient_email'] ) ) {
-			WC()->session->set( 'wcsg_recipients', $checkout_data['recipient_email'] );
+			// Store recipient emails on the cart items so they can be repopulated after checkout update
+			foreach ( WC()->cart->cart_contents as $key => $item ) {
+				if ( isset( $checkout_data['recipient_email'][ $key ] ) ) {
+					WCS_Gifting::update_cart_item_key( $item, $key, $checkout_data['recipient_email'][ $key ] );
+				}
+			}
 		}
 	}
 
