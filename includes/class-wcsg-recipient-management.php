@@ -314,7 +314,7 @@ class WCSG_Recipient_Management {
 	 */
 	public static function format_recipient_meta_label( $label, $name ) {
 		if ( 'wcsg_recipient' == $name || 'wcsg_deleted_recipient_data' == $name ) {
-			$label = 'Recipient';
+			$label = __('Recipient', 'woocommerce-subscriptions-gifting');
 		}
 		return $label;
 	}
