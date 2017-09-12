@@ -154,7 +154,7 @@ class WCSG_Admin {
 			$user_string = '';
 			$user_id     = '';
 			if ( WCS_Gifting::is_gifted_subscription( $subscription ) ) {
-				$user_id     = absint( $subscription->recipient_user );
+				$user_id     = WCS_Gifting::get_recipient_user( $subscription );
 				$user        = get_user_by( 'id', $user_id );
 				$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
 			} ?>
@@ -177,8 +177,8 @@ class WCSG_Admin {
 		}
 
 		$recipient_user         = empty( $_POST['recipient_user'] ) ? '' : absint( $_POST['recipient_user'] );
-		$customer_user          = get_post_meta( $post_id, '_customer_user', true );
 		$subscription           = wcs_get_subscription( $post_id );
+		$customer_user          = $subscription->get_user_id();
 		$is_gifted_subscription = WCS_Gifting::is_gifted_subscription( $subscription );
 
 		if ( $recipient_user == $customer_user ) {
@@ -187,18 +187,18 @@ class WCSG_Admin {
 			wcs_add_admin_notice( __( 'Error saving subscription recipient: customer and recipient cannot be the same. The recipient user has been removed.', 'woocommerce-subscriptions-gifting' ), 'error' );
 		}
 
-		if ( ( $is_gifted_subscription && $subscription->recipient_user == $recipient_user ) || ( ! $is_gifted_subscription && empty( $recipient_user ) ) ) {
+		if ( ( $is_gifted_subscription && WCS_Gifting::get_recipient_user( $subscription ) == $recipient_user ) || ( ! $is_gifted_subscription && empty( $recipient_user ) ) ) {
 			// Recipient user remains unchanged - do nothing
 			return;
 		} elseif ( empty( $recipient_user ) ) {
-			delete_post_meta( $post_id, '_recipient_user' );
+			WCS_Gifting::delete_recipient_user( $subscription );
 
 			// Delete recipient meta from subscription order items
 			foreach ( $subscription->get_items() as $order_item_id => $order_item ) {
 				wc_delete_order_item_meta( $order_item_id, 'wcsg_recipient' );
 			}
 		} else {
-			update_post_meta( $post_id, '_recipient_user', $recipient_user );
+			WCS_Gifting::set_recipient_user( $subscription, $recipient_user );
 
 			// Update all subscription order items
 			foreach ( $subscription->get_items() as $order_item_id => $order_item ) {
