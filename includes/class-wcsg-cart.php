@@ -215,7 +215,7 @@ class WCSG_Cart {
 		$recipient_user_id = '';
 
 		if ( isset( $cart_item['subscription_renewal'] ) && WCS_Gifting::is_gifted_subscription( $cart_item['subscription_renewal']['subscription_id'] ) ) {
-			$recipient_id    = get_post_meta( $cart_item['subscription_renewal']['subscription_id'], '_recipient_user', true );
+			$recipient_id    = WCS_Gifting::get_recipient_user( wcs_get_subscription( $cart_item['subscription_renewal']['subscription_id'] ) );
 			$recipient       = get_user_by( 'id', $recipient_id );
 			$recipient_email = $recipient->user_email;
 		} else if ( isset( $cart_item['wcsg_gift_recipients_email'] ) ) {

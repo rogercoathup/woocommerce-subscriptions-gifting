@@ -402,7 +402,7 @@ class WCSG_Recipient_Management {
 
 		if ( ! empty( $gifted_subscriptions ) ) {
 			foreach ( $gifted_subscriptions as $subscription_id ) {
-				update_post_meta( $subscription_id, '_recipient_user', 'deleted_recipient' );
+				WCS_Gifting::set_recipient_user( $subscription, 'deleted_recipient' );
 			}
 
 			$recipient      = get_user_by( 'id', $user_id );
