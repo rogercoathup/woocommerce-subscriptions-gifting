@@ -157,8 +157,21 @@ class WCSG_Admin {
 				$user_id     = WCS_Gifting::get_recipient_user( $subscription );
 				$user        = get_user_by( 'id', $user_id );
 				$user_string = esc_html( $user->display_name ) . ' (#' . absint( $user->ID ) . ' &ndash; ' . esc_html( $user->user_email );
-			} ?>
-			<input type="hidden" class="wc-customer-search" id="recipient_user" name="recipient_user" data-placeholder="<?php esc_attr_e( 'Search for a recipient&hellip;', 'woocommerce-subscriptions-gifting' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true"/>
+			}
+
+			if ( is_callable( array( 'WCS_Select2', 'render' ) ) ) {
+				WCS_Select2::render( array(
+					'class'       => 'wc-customer-search',
+					'name'        => 'recipient_user',
+					'id'          => 'recipient_user',
+					'placeholder' => esc_attr__( 'Search for a recipient&hellip;', 'woocommerce-subscriptions-gifting' ),
+					'selected'    => $user_string,
+					'value'       => $user_id,
+					'allow_clear' => 'true',
+				) );
+			} else { ?>
+				<input type="hidden" class="wc-customer-search" id="recipient_user" name="recipient_user" data-placeholder="<?php esc_attr_e( 'Search for a recipient&hellip;', 'woocommerce-subscriptions-gifting' ); ?>" data-selected="<?php echo esc_attr( $user_string ); ?>" value="<?php echo esc_attr( $user_id ); ?>" data-allow_clear="true"/><?php
+			}?>
 		</p><?php
 	}
 
