@@ -562,7 +562,7 @@ class WCS_Gifting {
 	 */
 	public static function set_recipient_user( &$subscription, $user_id, $save = 'save', $meta_id = '' ) {
 
-		if ( function_exists( 'wcs_set_objects_property' ) ) { // Subscriptions 2.2.0+
+		if ( function_exists( 'wcs_set_objects_property' ) && false === wcsg_is_woocommerce_pre( '3.0' ) ) { // Subscriptions 2.2.0+
 
 			wcs_set_objects_property( $subscription, 'recipient_user', $user_id, $save, $meta_id );
 
@@ -590,7 +590,7 @@ class WCS_Gifting {
 	 */
 	public static function delete_recipient_user( &$subscription, $save = 'save', $meta_id = '' ) {
 
-		if ( function_exists( 'wcs_delete_objects_property' ) ) { // Subscriptions 2.2.0+
+		if ( function_exists( 'wcs_delete_objects_property' ) && false === wcsg_is_woocommerce_pre( '3.0' ) ) { // Subscriptions 2.2.0+ and WC 3.0+
 
 			wcs_delete_objects_property( $subscription, 'recipient_user', $save, $meta_id );
 
