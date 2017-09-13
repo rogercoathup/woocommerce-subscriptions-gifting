@@ -433,6 +433,11 @@ msgid_plural "%1$s for %2$s items"
 msgstr[0] ""
 msgstr[1] ""
 
+#: templates/related-orders.php:78
+msgctxt "view a subscription"
+msgid "View"
+msgstr ""
+
 #: woocommerce-subscriptions-gifting.php:178
 msgid "Please enter someone else's email address."
 msgstr ""
