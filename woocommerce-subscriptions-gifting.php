@@ -550,5 +550,63 @@ class WCS_Gifting {
 
 		return $recipient_user_id;
 	}
+
+	/**
+	 * Set the recipient user ID on a subscription
+	 *
+	 * @param WC_Subscription $subscription
+	 * @param int $user_id The user ID of the user to set as the recipient on the subscription
+	 * @param string $save Whether to save the data or not, 'save' to save the data, otherwise it won't be saved.
+	 * @param int $meta_id The meta ID of existing meta data if you wish to overwrite an existing recipient meta value.
+	 * @return null
+	 */
+	public static function set_recipient_user( &$subscription, $user_id, $save = 'save', $meta_id = '' ) {
+
+		if ( function_exists( 'wcs_set_objects_property' ) && false === wcsg_is_woocommerce_pre( '3.0' ) ) { // Subscriptions 2.2.0+
+
+			wcs_set_objects_property( $subscription, 'recipient_user', $user_id, $save, $meta_id );
+
+		} else {
+
+			$subscription->recipient_user = $recipient_user_id;
+
+			if ( 'save' === $save ) {
+				if ( ! empty( $meta_id ) ) {
+					update_metadata_by_mid( 'post', $meta_id, $user_id, '_recipient_user' );
+				} else {
+					update_post_meta( $subscription->id, '_recipient_user', $user_id );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Delete the recipient user ID on a subscription
+	 *
+	 * @param WC_Subscription $subscription
+	 * @param string $save Whether to save the data or not, 'save' to save the data, otherwise it won't be saved.
+	 * @param int $meta_id The meta ID of existing recipient meta data if you wish to only delete a field specified by ID
+	 * @return null
+	 */
+	public static function delete_recipient_user( &$subscription, $save = 'save', $meta_id = '' ) {
+
+		if ( function_exists( 'wcs_delete_objects_property' ) && false === wcsg_is_woocommerce_pre( '3.0' ) ) { // Subscriptions 2.2.0+ and WC 3.0+
+
+			wcs_delete_objects_property( $subscription, 'recipient_user', $save, $meta_id );
+
+		} else {
+
+			unset( $subscription->recipient_user );
+
+			// Save the data
+			if ( 'save' === $save ) {
+				if ( ! empty( $meta_id ) ) {
+					delete_metadata_by_mid( 'post', $meta_id );
+				} else {
+					delete_post_meta( $subscription->id, '_recipient_user' );
+				}
+			}
+		}
+	}
 }
 WCS_Gifting::init();
