@@ -81,25 +81,28 @@ class WCSG_Email {
 			add_action( $action, __CLASS__ . '::maybe_send_recipient_renewal_notification', 12, 1 );
 		}
 
-		foreach ( self::$downloadable_email_data as $email_id => $hook_data ) {
+		// WC 3.1 removed the email subjects and headings which reference downloadable files. Post 3.1 we don't need to worry about reformatting them
+		if ( wcsg_is_woocommerce_pre( '3.1' ) ) {
+			foreach ( self::$downloadable_email_data as $email_id => $hook_data ) {
 
-			// hook on just before default to store a flag of the email being sent.
-			add_action( $hook_data['trigger_action'], __CLASS__ . '::set_sending_downloadable_email_flag', 9 );
-			add_action( $hook_data['trigger_action'], __CLASS__ . '::remove_sending_downloadable_email_flag', 11 );
+				// hook on just before default to store a flag of the email being sent.
+				add_action( $hook_data['trigger_action'], __CLASS__ . '::set_sending_downloadable_email_flag', 9 );
+				add_action( $hook_data['trigger_action'], __CLASS__ . '::remove_sending_downloadable_email_flag', 11 );
 
-			// hook the subject and heading hooks
-			if ( ! empty( $hook_data['heading_filter'] ) ) {
-				add_filter( $hook_data['heading_filter'], __CLASS__ . '::maybe_change_download_email_heading', 10, 2 );
+				// hook the subject and heading hooks
+				if ( ! empty( $hook_data['heading_filter'] ) ) {
+					add_filter( $hook_data['heading_filter'], __CLASS__ . '::maybe_change_download_email_heading', 10, 2 );
+				}
+
+				if ( ! empty( $hook_data['subject_hook'] ) ) {
+					add_filter( $hook_data['subject_hook'], __CLASS__ . '::maybe_change_download_email_heading', 10, 2 );
+				}
 			}
 
-			if ( ! empty( $hook_data['subject_hook'] ) ) {
-				add_filter( $hook_data['subject_hook'], __CLASS__ . '::maybe_change_download_email_heading', 10, 2 );
-			}
+			// hook onto emails sent via order actions
+			add_action( 'woocommerce_before_resend_order_emails', __CLASS__ . '::set_sending_downloadable_email_flag', 9 );
+			add_action( 'woocommerce_after_resend_order_email', __CLASS__ . '::remove_sending_downloadable_email_flag', 11 );
 		}
-
-		// hook onto emails sent via order actions
-		add_action( 'woocommerce_before_resend_order_emails', __CLASS__ . '::set_sending_downloadable_email_flag', 9 );
-		add_action( 'woocommerce_after_resend_order_email', __CLASS__ . '::remove_sending_downloadable_email_flag', 11 );
 	}
 
 	/**
