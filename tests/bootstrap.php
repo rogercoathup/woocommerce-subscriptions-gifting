@@ -45,15 +45,14 @@ class WCS_Unit_Tests_Bootstrap {
 		// load WC
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_wc' ) );
 
+		// load Subscriptions after $this->load_wc() finishes and calls 'woocommerce_init'
+		tests_add_filter( 'woocommerce_init', array( $this, 'load_wcs' ) );
+
 		// install WC
 		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 
-		$GLOBALS['wp_options'] = array(
-			'active_plugins' => array(
-				$this->modules_dir . '/woocommerce/woocommerce.php',
-				$this->modules_dir . '/woocommerce-subscriptions/woocommerce-subscriptions.php'
-			),
-		);
+		// install WCS
+		tests_add_filter( 'setup_theme', array( $this, 'install_wcs' ) );
 
 		// load the WP testing environment
 		require_once( $this->wp_tests_dir . '/includes/bootstrap.php' );
@@ -61,23 +60,8 @@ class WCS_Unit_Tests_Bootstrap {
 		// load testing framework
 		$this->includes();
 
-		// load WooCommerce Subcriptions
-		require_once( $this->modules_dir . '/woocommerce-subscriptions/woocommerce-subscriptions.php' );
-
-		// Set Subcriptions install data so that Gifting won't exit early
-		$active_plugins   = get_option( 'active_plugins', array() );
-		$active_plugins[] = 'woocommerce-subscriptions/woocommerce-subscriptions.php';
-		update_option( 'active_plugins', $active_plugins );
-		update_option( WC_Subscriptions_Admin::$option_prefix . '_active_version', WC_Subscriptions::$version );
-
-		// load WooCommerce Subcriptions Gifting
+		// load WooCommerce Subscriptions Gifting
 		require_once( $this->plugin_dir . '/woocommerce-subscriptions-gifting.php' );
-
-		// set active and inactive subscriber roles
-		update_option( WC_Subscriptions_Admin::$option_prefix . '_subscriber_role', 'subscriber' );
-		update_option( WC_Subscriptions_Admin::$option_prefix . '_cancelled_role', 'customer' );
-
-		WC_Subscriptions::register_order_types();
 	}
 
 	/**
@@ -87,6 +71,15 @@ class WCS_Unit_Tests_Bootstrap {
 	 */
 	public function load_wc() {
 		require_once( $this->modules_dir . '/woocommerce/woocommerce.php' );
+	}
+
+	/**
+	 * Load Subscriptions
+	 *
+	 * @since  2.0
+	 */
+	public function load_wcs() {
+		require_once( $this->modules_dir . '/woocommerce-subscriptions/woocommerce-subscriptions.php' );
 	}
 
 	/**
@@ -105,11 +98,53 @@ class WCS_Unit_Tests_Bootstrap {
 		WC_Install::install();
 
 		// reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374
-		$GLOBALS['wp_roles']->reinit();
+		if ( version_compare( $GLOBALS['wp_version'], '4.9', '>=' ) && method_exists( $GLOBALS['wp_roles'], 'for_site' ) ) {
+			/** @see: https://core.trac.wordpress.org/ticket/38645 */
+			$GLOBALS['wp_roles']->for_site();
+		} elseif ( version_compare( $GLOBALS['wp_version'], '4.7', '>=' ) ) {
+			// Do the right thing based on https://core.trac.wordpress.org/ticket/23016
+			$GLOBALS['wp_roles'] = new WP_Roles();
+		} else {
+			// Fall back to the old method.
+			$GLOBALS['wp_roles']->reinit();
+		}
+
+		// Set Subscriptions install data so that Gifting won't exit early
+		$active_plugins   = get_option( 'active_plugins', array() );
+		$active_plugins[] = 'woocommerce/woocommerce.php';
+		update_option( 'active_plugins', $active_plugins );
 
 		WC()->init();
 
 		echo "WooCommerce Finished Installing..." . PHP_EOL;
+	}
+
+	/**
+	 * Set default values on subscriptions
+	 *
+	 * @since  2.0
+	 */
+	public function install_wcs() {
+
+		echo "Installing Subscriptions..." . PHP_EOL;
+
+		WC_Subscriptions::maybe_activate_woocommerce_subscriptions();
+
+		WC_Subscriptions::load_dependant_classes();
+
+		// Set Subscriptions install data so that Gifting won't exit early
+		$active_plugins   = get_option( 'active_plugins', array() );
+		$active_plugins[] = 'woocommerce-subscriptions/woocommerce-subscriptions.php';
+		update_option( 'active_plugins', $active_plugins );
+		update_option( WC_Subscriptions_Admin::$option_prefix . '_active_version', WC_Subscriptions::$version );
+
+		WC_Subscriptions::register_order_types();
+
+		// set active and inactive subscriber roles
+		update_option( WC_Subscriptions_Admin::$option_prefix . '_subscriber_role', 'subscriber' );
+		update_option( WC_Subscriptions_Admin::$option_prefix . '_cancelled_role', 'customer' );
+
+		echo "Subscriptions Finished Installing..." . PHP_EOL;
 	}
 
 	/**
@@ -145,7 +180,6 @@ class WCS_Unit_Tests_Bootstrap {
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/tests/framework/class-wcs-unit-test-case.php' );
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/tests/framework/class-wcs-unit-test-factory.php' );
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/tests/framework/class-wcs-api-unit-test-case.php' );
-		require_once( $this->modules_dir . '/woocommerce-subscriptions/tests/framework/class-wcs-test-subscription-class.php' );
 
 		// Load WC Helper Functions
 		require_once( $this->modules_dir . '/woocommerce/tests/framework/helpers/class-wc-helper-product.php' );
