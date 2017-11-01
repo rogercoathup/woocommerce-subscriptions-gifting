@@ -115,7 +115,7 @@ class WCSG_Renewal_Order_Tests extends WC_Unit_Test_Case {
 
 		add_filter( 'woocommerce_subscription_is_purchasable', '__return_true' );
 
-		WC()->cart->add_to_cart( $product->id, 1, '', array(), array( 'subscription_renewal' => array( 'subscription_id' => wcsg_get_objects_id( $subscription ) ) ) );
+		WC()->cart->add_to_cart( wcsg_get_objects_id( $product ), 1, '', array(), array( 'subscription_renewal' => array( 'subscription_id' => wcsg_get_objects_id( $subscription ) ) ) );
 
 		remove_filter( 'woocommerce_subscription_is_purchasable', '__return_true' );
 	}
@@ -129,7 +129,7 @@ class WCSG_Renewal_Order_Tests extends WC_Unit_Test_Case {
 
 		wp_delete_post( wcsg_get_objects_id( $this->subscription ), true );
 		wp_delete_post( wcsg_get_objects_id( $this->gifted_subscription ), true );
-		wp_delete_post( $this->subscription_product->id, true );
+		wp_delete_post( wcsg_get_objects_id( $this->subscription_product ), true );
 
 		wp_delete_user( $this->recipient_user );
 	}
