@@ -22,7 +22,7 @@ class WCSG_Test_Download_Permission_Functions extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_subscriptions_gifting_downloadable_products', 'no' );
 
 		//Default Case - Gifted subscription should grant recipient download permission.
-		$data                = array( 'order_id' => $gifted_subscription->id );
+		$data                = array( 'order_id' => wcsg_get_objects_id( $gifted_subscription ) );
 		$result              = WCSG_Download_Handler::grant_recipient_download_permissions( $data );
 		$purchaser_downloads = self::get_download_permissions( $purchaser_user );
 
@@ -30,14 +30,14 @@ class WCSG_Test_Download_Permission_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( empty( $purchaser_downloads ) );
 
 		//Not gifted - Not gifted subscription shouldn't change the user granted download permission
-		$data                = array( 'order_id' => $subscription->id );
+		$data                = array( 'order_id' => wcsg_get_objects_id( $subscription ) );
 		$result              = WCSG_Download_Handler::grant_recipient_download_permissions( $data );
 		$this->assertTrue( empty( $result['user_id'] ) );
 
 		//test granting purchasers access.
 		$updated = update_option( 'woocommerce_subscriptions_gifting_downloadable_products', 'yes' );
 
-		$data                = array( 'order_id' => $gifted_subscription->id, 'download_id' => 1, 'product_id' => $subscription_product->id );
+		$data                = array( 'order_id' => wcsg_get_objects_id( $gifted_subscription ), 'download_id' => 1, 'product_id' => wcsg_get_objects_id( $subscription_product ) );
 		$result              = WCSG_Download_Handler::grant_recipient_download_permissions( $data );
 		$purchaser_downloads = self::get_download_permissions( $purchaser_user );
 
@@ -46,14 +46,14 @@ class WCSG_Test_Download_Permission_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( ! empty( $purchaser_downloads ) );
 
 		foreach( $purchaser_downloads as $download ) {
-			$this->assertEquals( $download->order_id, $gifted_subscription->id );
-			$this->assertEquals( $download->product_id, $subscription_product->id );
+			$this->assertEquals( $download->order_id, wcsg_get_objects_id( $gifted_subscription ) );
+			$this->assertEquals( $download->product_id, wcsg_get_objects_id( $subscription_product ) );
 		}
 
 		//Clean-up
 		remove_action( 'before_delete_post', 'WC_Subscriptions_Manager::maybe_cancel_subscription', 10, 1 );
-		wp_delete_post( $gifted_subscription->id );
-		wp_delete_post( $subscription->id );
+		wp_delete_post( wcsg_get_objects_id( $gifted_subscription ) );
+		wp_delete_post( wcsg_get_objects_id( $subscription ) );
 		add_action( 'before_delete_post', 'WC_Subscriptions_Manager::maybe_cancel_subscription', 10, 1 );
 
 		wp_delete_user( $purchaser_user );
