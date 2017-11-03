@@ -162,10 +162,6 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
-#: includes/class-wcsg-recipient-management.php:317
-msgid "Recipient"
-msgstr ""
-
 #: includes/class-wcsg-recipient-management.php:463
 msgid "WARNING:"
 msgstr ""
