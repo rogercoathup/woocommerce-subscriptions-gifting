@@ -151,9 +151,10 @@ In the event that a recipient does not have an account with your store at the ti
 
 The first time the new recipient logs into their account they will be prompted to enter their shipping address as well as change their password.
 
-![](https://cldup.com/hbICzQoNWr-3000x3000.png)
+![](https://cldup.com/O9RU0ib4el.png)
 
 <img src="https://cldup.com/W_Qf0vhrOr.png" height="778" width="522" align="right">
+
 #### Shipping Address
 
 When a gifted subscription is purchased, the shipping address of the subscription is set to the recipient's shipping address. This streamlines the process for customers proceeding through the checkout when purchasing subscription products for other users.
