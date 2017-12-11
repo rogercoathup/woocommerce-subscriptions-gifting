@@ -83,14 +83,12 @@ class WCS_Gifting {
 	 */
 	public static function init() {
 
-		register_activation_hook( __FILE__, __CLASS__ . '::wcsg_install' );
+		add_action( 'init', __CLASS__ . '::maybe_activate' );
 
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::gifting_scripts' );
 
 		// Needs to run after Subscriptions has loaded its dependant classes
 		add_action( 'plugins_loaded', __CLASS__ . '::load_dependant_classes' , 11 );
-
-		add_action( 'init', __CLASS__ . '::maybe_flush_rewrite_rules' );
 
 		add_action( 'wc_get_template', __CLASS__ . '::get_recent_orders_template', 1 , 3 );
 
@@ -233,24 +231,26 @@ class WCS_Gifting {
 	}
 
 	/**
-	 * Install wcsg
+	 * Checks on each admin page load if Gifting plugin is activated.
+	 *
+	 * Apparently the official WP API is "lame" and it's far better to use an upgrade routine fired on admin_init: https://core.trac.wordpress.org/ticket/14170#comment:68
+	 *
+	 * @since 1.1
 	 */
-	public static function wcsg_install() {
-		if ( 'false' === get_option( 'wcsg_flush_rewrite_rules_flag', 'false' ) ) {
-			add_option( 'wcsg_flush_rewrite_rules_flag', 'true' );
-		}
-	}
+	public static function maybe_activate() {
 
-	/**
-	 * Flush rewrite rules if they haven't been flushed since plugin activation
-	 */
-	public static function maybe_flush_rewrite_rules() {
-		if ( 'true' === get_option( 'wcsg_flush_rewrite_rules_flag', 'false' ) ) {
+		$is_active = get_option( WCSG_Admin::$option_prefix . '_is_active', false );
+
+		if ( false == $is_active ) {
+
+			add_option( WCSG_Admin::$option_prefix . '_is_active', true );
+
 			flush_rewrite_rules();
-			delete_option( 'wcsg_flush_rewrite_rules_flag' );
-		}
 
+			do_action( 'woocommerce_subscriptions_gifting_activated' );
+		}
 	}
+
 	/**
 	 * Generates an array of arguments used to create the recipient email html fields
 	 * @return array | email_field_args A set of html attributes
@@ -594,6 +594,20 @@ class WCS_Gifting {
 	 */
 	public static function admin_scripts() {
 		_deprecated_function( __METHOD__, '2.0.0', 'WCSG_Admin::enqueue_scripts()' );
+	}
+
+	/**
+	 * Install wcsg
+	 */
+	public static function wcsg_install() {
+		_deprecated_function( __METHOD__, '2.0.0', 'WCS_Gifting::maybe_activate()' );
+	}
+
+	/**
+	 * Flush rewrite rules if they haven't been flushed since plugin activation
+	 */
+	public static function maybe_flush_rewrite_rules() {
+		_deprecated_function( __METHOD__, '2.0.0', 'flush_rewrite_rules()' );
 	}
 }
 WCS_Gifting::init();
