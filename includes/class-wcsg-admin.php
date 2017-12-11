@@ -27,6 +27,8 @@ class WCSG_Admin {
 
 		// Save recipient user after WC have saved all subscription order items (40)
 		add_action( 'woocommerce_process_shop_order_meta', __CLASS__ . '::save_subscription_recipient_meta', 50, 2 );
+
+		add_action( 'admin_notices', __CLASS__ . '::admin_installed_notice' );
 	}
 
 	/**
@@ -48,6 +50,10 @@ class WCSG_Admin {
 			);
 
 			wp_enqueue_script( 'wcs_gifting_admin' );
+		}
+
+		if ( true == get_transient( 'wcsg_show_activation_notice' ) ) {
+			wp_enqueue_style( 'woocommerce-activation', plugins_url( '/assets/css/activation.css', WC_PLUGIN_FILE ), array(), WC_VERSION );
 		}
 	}
 
@@ -247,6 +253,29 @@ class WCSG_Admin {
 				wc_update_order_item_meta( $order_item_id, 'wcsg_recipient', 'wcsg_recipient_id_' . $recipient_user );
 			}
 		}
+	}
+
+	/**
+	 * Outputs a welcome message. Called when the Subscriptions extension is activated.
+	 *
+	 * @since 2.0.0
+	 */
+	public static function admin_installed_notice() {
+
+		if ( true == get_transient( 'wcsg_show_activation_notice' ) ) {
+			wc_get_template( 'activation-notice.php', array( 'settings_tab_url' => self::settings_tab_url() ), '', plugin_dir_path( WCS_Gifting::$plugin_file ) . 'templates/' );
+			delete_transient( 'wcsg_show_activation_notice' );
+		}
+	}
+
+	/**
+	 * A WooCommerce version aware function for getting the Subscriptions/Gifting admin settings tab URL.
+	 *
+	 * @since 2.0.0
+	 * @return string
+	 */
+	public static function settings_tab_url() {
+		return apply_filters( 'woocommerce_subscriptions_settings_tab_url', admin_url( 'admin.php?page=wc-settings&tab=subscriptions' ) );
 	}
 }
 WCSG_Admin::init();

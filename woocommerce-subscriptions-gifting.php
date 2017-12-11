@@ -245,6 +245,8 @@ class WCS_Gifting {
 
 			add_option( WCSG_Admin::$option_prefix . '_is_active', true );
 
+			set_transient( 'wcsg_show_activation_notice', true, DAY_IN_SECONDS );
+
 			flush_rewrite_rules();
 
 			do_action( 'woocommerce_subscriptions_gifting_activated' );
