@@ -1,12 +1,15 @@
 <?php
 /**
  * Plugin Name: WooCommerce Subscriptions Gifting
- * Plugin URI: https://github.com/prospress/woocommerce-subscriptions-gifting
+ * Plugin URI: http://woocommerce.com/products/woocommerce-extension/woocommerce-subscriptions-gifting
  * Description: Allow customers to buy a subscription product for someone else, then share subscription management between the purchaser and recipient.
  * Author: Prospress Inc.
  * Author URI: http://prospress.com/
- * Version: 1.0
+ * Version: 2.0.0
  * License: GPLv3
+ *
+ * WC requires at least: 2.4
+ * WC tested up to: 3.3
  *
  * GitHub Plugin URI: Prospress/woocommerce-subscriptions-gifting
  * GitHub Branch: master
