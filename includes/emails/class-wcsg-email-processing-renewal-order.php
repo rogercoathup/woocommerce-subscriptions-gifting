@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WCSG_Email_Processing_Renewal_Order extends WCS_Email_Processing_Renewal_Order {
 
 	public $wcsg_sending_recipient_email;

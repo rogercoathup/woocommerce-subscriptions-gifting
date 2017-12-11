@@ -31,6 +31,10 @@
  * @since		1.0
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
+}
+
 include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
 /**

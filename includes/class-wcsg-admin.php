@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WCSG_Admin {
 
 	public static $option_prefix = 'woocommerce_subscriptions_gifting';

@@ -1,5 +1,9 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WCSG_Email_Customer_New_Account extends WC_Email {
 
 	public $subscription_owner;

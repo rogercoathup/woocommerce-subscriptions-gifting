@@ -1,4 +1,9 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 class WCSG_Memberships_Integration {
 
 	public static $processing_memberships_for_order;

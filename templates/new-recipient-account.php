@@ -1,4 +1,10 @@
-<?php wc_print_notices(); ?>
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+wc_print_notices(); ?>
 
 <p><?php
 	esc_html_e( 'We just need a few details from you to complete your account creation.', 'woocommerce-subscriptions-gifting' ); ?><br /><?php

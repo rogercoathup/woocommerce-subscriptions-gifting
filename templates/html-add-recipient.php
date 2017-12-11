@@ -1,3 +1,10 @@
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
 <fieldset>
 	<input type="checkbox" id="gifting_<?php echo esc_attr( $id ); ?>_option" class="woocommerce_subscription_gifting_checkbox" value="gift" <?php echo esc_attr( ( empty( $email ) ) ? '' : 'checked' ); ?> />
 	<label for="gifting_<?php echo esc_attr( $id ); ?>_option">
