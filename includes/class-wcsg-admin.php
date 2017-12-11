@@ -13,6 +13,8 @@ class WCSG_Admin {
 	 */
 	public static function init() {
 
+		add_action( 'admin_enqueue_scripts',  __CLASS__ . '::enqueue_scripts' );
+
 		add_filter( 'woocommerce_subscription_list_table_column_content', __CLASS__ . '::display_recipient_name_in_subscription_title', 1, 3 );
 
 		add_filter( 'woocommerce_order_items_meta_get_formatted', __CLASS__ . '::remove_recipient_order_item_meta', 1, 1 );
@@ -25,6 +27,28 @@ class WCSG_Admin {
 
 		// Save recipient user after WC have saved all subscription order items (40)
 		add_action( 'woocommerce_process_shop_order_meta', __CLASS__ . '::save_subscription_recipient_meta', 50, 2 );
+	}
+
+	/**
+	 * Register/queue admin scripts.
+	 */
+	public static function enqueue_scripts() {
+		global $post;
+
+		$screen = get_current_screen();
+
+		if ( 'shop_subscription' == $screen->id && WCS_Gifting::is_gifted_subscription( $post->ID ) ) {
+
+			wp_register_script( 'wcs_gifting_admin', plugins_url( '/js/wcsg-admin.js', __FILE__ ), array( 'jquery', 'wc-admin-order-meta-boxes' ) );
+
+			wp_localize_script( 'wcs_gifting_admin', 'wcs_gifting', array(
+				'revoke_download_permission_nonce' => wp_create_nonce( 'revoke_download_permission' ),
+				'ajax_url'                         => admin_url( 'admin-ajax.php' ),
+				)
+			);
+
+			wp_enqueue_script( 'wcs_gifting_admin' );
+		}
 	}
 
 	/**
