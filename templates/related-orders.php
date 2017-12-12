@@ -1,3 +1,10 @@
+<?php
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+?>
 <header>
 	<h2><?php esc_html_e( 'Related Orders', 'woocommerce-subscriptions-gifting' ); ?></h2>
 </header>
