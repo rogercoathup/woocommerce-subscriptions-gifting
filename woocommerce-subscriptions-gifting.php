@@ -88,6 +88,8 @@ class WCS_Gifting {
 
 		add_action( 'init', __CLASS__ . '::maybe_activate' );
 
+		register_deactivation_hook( __FILE__, __CLASS__ . '::deactivate' );
+
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::gifting_scripts' );
 
 		// Needs to run after Subscriptions has loaded its dependant classes
@@ -254,6 +256,20 @@ class WCS_Gifting {
 
 			do_action( 'woocommerce_subscriptions_gifting_activated' );
 		}
+	}
+
+	/**
+	 * Called when the plugin is deactivated. Deletes the is active flag and fires an action.
+	 *
+	 * @since 2.0.0
+	 */
+	public static function deactivate() {
+
+		delete_option( WCSG_Admin::$option_prefix . '_is_active' );
+
+		flush_rewrite_rules();
+
+		do_action( 'woocommerce_subscriptions_gifting_deactivated' );
 	}
 
 	/**
