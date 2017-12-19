@@ -2,7 +2,7 @@
 Contributors: prospress, thenbrent
 Tags: ecommerce, e-commerce, woocommerce, subscriptions, gifting, memberships
 Requires at least: 4.6
-Tested up to: 4.6.1
+Tested up to: 4.9.1
 Stable tag: 2.0.0
 License: GPLv2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html

@@ -29,6 +29,9 @@ class WCSG_Admin {
 		add_action( 'woocommerce_process_shop_order_meta', __CLASS__ . '::save_subscription_recipient_meta', 50, 2 );
 
 		add_action( 'admin_notices', __CLASS__ . '::admin_installed_notice' );
+
+		// Add the "Settings | Docs" links on the Plugins administration screen
+		add_filter( 'plugin_action_links_' . plugin_basename( WCS_Gifting::$plugin_file ), __CLASS__ . '::action_links' );
 	}
 
 	/**
@@ -266,6 +269,23 @@ class WCSG_Admin {
 			wc_get_template( 'activation-notice.php', array( 'settings_tab_url' => self::settings_tab_url() ), '', plugin_dir_path( WCS_Gifting::$plugin_file ) . 'templates/' );
 			delete_transient( 'wcsg_show_activation_notice' );
 		}
+	}
+
+	/**
+	 * Include Docs & Settings links on the Plugins administration screen
+	 *
+	 * @param mixed $links
+	 * @since 2.0.0
+	 */
+	public static function action_links( $links ) {
+
+		$plugin_links = array(
+			'<a href="' . self::settings_tab_url() . '">' . __( 'Settings', 'woocommerce-subscriptions-gifting' ) . '</a>',
+			'<a href="http://docs.woocommerce.com/document/subscriptions-gifting/">' . _x( 'Docs', 'short for documents', 'woocommerce-subscriptions-gifting' ) . '</a>',
+			'<a href="https://woocommerce.com/my-account/marketplace-ticket-form/">' . __( 'Support', 'woocommerce-subscriptions-gifting' ) . '</a>',
+		);
+
+		return array_merge( $plugin_links, $links );
 	}
 
 	/**
