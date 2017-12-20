@@ -65,7 +65,7 @@ class WCSG_Email {
 	public static function hook_email() {
 
 		add_action( 'woocommerce_created_customer', __CLASS__ . '::maybe_remove_wc_new_customer_email', 9, 2 );
-		add_action( 'woocommerce_created_customer', __CLASS__ . '::send_new_recient_user_email', 10, 3 );
+		add_action( 'woocommerce_created_customer', __CLASS__ . '::send_new_recipient_user_email', 10, 3 );
 		add_action( 'woocommerce_created_customer', __CLASS__ . '::maybe_reattach_wc_new_customer_email', 11, 2 );
 
 		add_action( 'woocommerce_order_status_pending_to_processing', __CLASS__ . '::maybe_send_recipient_order_emails' );
@@ -177,7 +177,7 @@ class WCSG_Email {
 	 * @param array $new_customer_data
 	 * @param bool $password_generated Whether the password has been generated for the customer
 	 */
-	public static function send_new_recient_user_email( $customer_id, $new_customer_data, $password_generated ) {
+	public static function send_new_recipient_user_email( $customer_id, $new_customer_data, $password_generated ) {
 		foreach ( WC()->cart->cart_contents as $key => $item ) {
 			if ( isset( $item['wcsg_gift_recipients_email'] ) ) {
 				if ( $item['wcsg_gift_recipients_email'] == $new_customer_data['user_email'] ) {
